@@ -1,0 +1,4006 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#fce4ec" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Для любимой Сони ❤️</title>
+  <meta name="description" content="Романтический сайт-подарок для Сони от Сени с воспоминаниями, важными датами, видео, галереей и письмом." />
+  <meta property="og:title" content="Для любимой Сони ❤️" />
+  <meta property="og:description" content="Романтический сайт-подарок для Сони от Сени с воспоминаниями, важными датами, видео, галереей и письмом." />
+
+  <!-- Предварительное глобальное объявление обработчиков ошибок для фото и медиа -->
+  <script>
+    function handleBgImgError(imgEl) {
+      if (imgEl) imgEl.style.opacity = '0';
+    }
+    function handleSideImgError(imgEl, filename) {
+      if (!imgEl) return;
+      imgEl.style.display = 'none';
+      const parent = imgEl.parentElement;
+      if (parent && !parent.querySelector('.img-placeholder')) {
+        const ph = document.createElement('div');
+        ph.className = 'img-placeholder';
+        ph.innerHTML = '<span>💕</span><div>' + (filename || 'Фото') + '</div>';
+        parent.appendChild(ph);
+      }
+    }
+    function handleGalleryImgError(imgEl) {
+      if (!imgEl) return;
+      imgEl.style.opacity = '0.35';
+      imgEl.alt = 'Фото загружается...';
+    }
+    function handleVideoError() {
+      const fallbackBox = document.getElementById('video-fallback');
+      if (fallbackBox) {
+        fallbackBox.style.display = 'block';
+      }
+    }
+    function handleAudioError() {
+      console.log('Подсказка: чтобы играла твоя собственная песня, положи аудиофайл в папку images/music.mp3 ❤️');
+    }
+  </script>
+
+  <style>
+    /* ========================================================
+       СБРОС СТИЛЕЙ И БАЗОВЫЕ НАСТРОЙКИ (ДЛЯ IPHONE SAFARI)
+       ======================================================== */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    input, textarea, button {
+      font-family: inherit;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+
+    :root {
+      --bg-pink-1: #fff1f5;
+      --bg-pink-2: #fedbe6;
+      --bg-pink-card: rgba(255, 255, 255, 0.88);
+      --border-pink: rgba(244, 143, 177, 0.45);
+      --primary-rose: #d81b60;
+      --accent-deep: #880e4f;
+      --text-main: #4a1525;
+      --text-muted: #8c4357;
+      --shadow-soft: 0 10px 30px rgba(216, 27, 96, 0.12);
+      --shadow-hover: 0 14px 36px rgba(216, 27, 96, 0.22);
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      background: linear-gradient(135deg, var(--bg-pink-1) 0%, var(--bg-pink-2) 100%);
+      font-family: -apple-system, BlinkMacSystemFont, "Georgia", "Times New Roman", "Baskerville", serif;
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
+      touch-action: manipulation;
+    }
+
+    /* Холст для анимированных сердечек */
+    #hearts-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Фоновые фото для экранов 1 и 2 */
+    .bg-slideshow {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .bg-slideshow img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 1.8s ease-in-out;
+      filter: saturate(1.1) brightness(1.05);
+    }
+
+    .bg-slideshow img.active {
+      opacity: 0.24; /* Мягкая полупрозрачность фона */
+    }
+
+    .bg-slideshow::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at center, rgba(255, 245, 248, 0.6) 0%, rgba(254, 219, 230, 0.85) 100%);
+      pointer-events: none;
+    }
+
+    /* Основная обертка экранов с плавным переходом (fade) */
+    .screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      z-index: 5;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+      padding: env(safe-area-inset-top, 16px) env(safe-area-inset-right, 16px) env(safe-area-inset-bottom, 16px) env(safe-area-inset-left, 16px);
+      box-sizing: border-box;
+    }
+
+    .screen.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Карточки с эффектом стекла (glassmorphism) */
+    .glass-card {
+      background: var(--bg-pink-card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-pink);
+      border-radius: 24px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    /* ========================================================
+       ЭКРАН 1: ЗАГРУЗКА ЛЮБВИ (15 СЕКУНД)
+       ======================================================== */
+    #screen-loading {
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+    }
+
+    .loading-container {
+      width: 100%;
+      max-width: 440px;
+      padding: 36px 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 22px;
+    }
+
+    .heart-pulse-icon {
+      font-size: 52px;
+      animation: heartBeat 1.3s infinite ease-in-out;
+      filter: drop-shadow(0 6px 12px rgba(216, 27, 96, 0.35));
+    }
+
+    @keyframes heartBeat {
+      0%, 100% { transform: scale(1); }
+      14% { transform: scale(1.18); }
+      28% { transform: scale(1); }
+      42% { transform: scale(1.14); }
+      70% { transform: scale(1); }
+    }
+
+    .loading-text {
+      font-size: 20px;
+      line-height: 1.45;
+      font-weight: 500;
+      color: var(--accent-deep);
+      min-height: 58px;
+      display: block;
+      text-align: center;
+      transition: color 0.4s ease;
+    }
+
+    .loading-text sup {
+      font-size: 0.6em;
+      vertical-align: super;
+      line-height: 0;
+      font-weight: bold;
+      position: relative;
+      top: -0.2em;
+    }
+
+    .math-exp {
+      white-space: nowrap;
+      display: inline-block;
+    }
+
+    .progress-bar-wrap {
+      width: 100%;
+      height: 18px;
+      background: rgba(248, 187, 208, 0.45);
+      border-radius: 999px;
+      padding: 3px;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+      border: 1px solid rgba(244, 143, 177, 0.5);
+    }
+
+    .progress-bar-fill {
+      width: 0%;
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #f06292 0%, #d81b60 50%, #ad1457 100%);
+      transition: width 0.1s linear;
+      box-shadow: 0 0 14px rgba(216, 27, 96, 0.65);
+    }
+
+    .loading-subtext {
+      font-size: 14px;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+
+    /* ========================================================
+       ЭКРАН 2: ПАРОЛЬ
+       ======================================================== */
+    #screen-password {
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+    }
+
+    .password-card {
+      width: 100%;
+      max-width: 440px;
+      padding: 36px 26px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .password-question {
+      font-size: 21px;
+      line-height: 1.4;
+      font-weight: 600;
+      color: var(--accent-deep);
+      text-align: center;
+    }
+
+    .password-input-group {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .password-input {
+      width: 100%;
+      max-width: 280px;
+      padding: 14px 18px;
+      font-size: 22px;
+      text-align: center;
+      border: 2px solid rgba(244, 143, 177, 0.7);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.95);
+      color: var(--accent-deep);
+      font-weight: bold;
+      letter-spacing: 2px;
+      outline: none;
+      box-shadow: 0 4px 12px rgba(216, 27, 96, 0.08);
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+
+    .password-input:focus {
+      border-color: var(--primary-rose);
+      box-shadow: 0 0 0 4px rgba(216, 27, 96, 0.18);
+    }
+
+    .password-btn {
+      padding: 13px 36px;
+      font-size: 17px;
+      font-weight: 600;
+      color: #fff;
+      background: linear-gradient(135deg, #e91e63 0%, #c2185b 100%);
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(194, 24, 91, 0.35);
+      transition: transform 0.18s, box-shadow 0.18s;
+    }
+
+    .password-btn:active {
+      transform: scale(0.96);
+      box-shadow: 0 4px 12px rgba(194, 24, 91, 0.3);
+    }
+
+    .password-error {
+      min-height: 24px;
+      font-size: 15px;
+      color: #c2185b;
+      font-style: italic;
+      font-weight: 500;
+      transition: opacity 0.3s;
+    }
+
+    .shake {
+      animation: shakeAnim 0.45s ease-in-out;
+    }
+
+    @keyframes shakeAnim {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-10px); }
+      40% { transform: translateX(10px); }
+      60% { transform: translateX(-7px); }
+      80% { transform: translateX(7px); }
+    }
+
+    /* ========================================================
+       ЭКРАН 3: ГЛАВНОЕ МЕНЮ (5 ВКЛАДОК КРЕСТОМ ДЛЯ IPHONE)
+       ======================================================== */
+    #screen-menu {
+      justify-content: space-between;
+      align-items: center;
+      padding: max(14px, env(safe-area-inset-top)) 16px max(14px, env(safe-area-inset-bottom)) 16px;
+      position: relative;
+    }
+
+    /* Кнопка романтической музыки в углу главного меню */
+    .music-toggle-btn {
+      position: absolute;
+      top: max(12px, env(safe-area-inset-top));
+      right: max(14px, env(safe-area-inset-right));
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1.5px solid rgba(244, 143, 177, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(216, 27, 96, 0.16);
+      z-index: 60;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      pointer-events: auto;
+      transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s, background-color 0.2s, border-color 0.2s;
+    }
+
+    .music-toggle-btn:active {
+      transform: scale(0.92);
+    }
+
+    .music-icon {
+      font-size: 21px;
+      line-height: 1;
+      display: inline-block;
+      transition: transform 0.25s ease;
+      filter: drop-shadow(0 2px 4px rgba(216, 27, 96, 0.2));
+    }
+
+    .music-toggle-btn.playing {
+      background: #fff0f5;
+      border-color: var(--primary-rose);
+      box-shadow: 0 0 16px rgba(233, 30, 99, 0.45);
+    }
+
+    .music-toggle-btn.playing .music-icon {
+      animation: musicBeat 1.1s infinite alternate ease-in-out;
+    }
+
+    @keyframes musicBeat {
+      0% { transform: scale(1) rotate(-8deg); }
+      100% { transform: scale(1.22) rotate(10deg); }
+    }
+
+    /* Секретная кнопка с вопросом в правом нижнем углу меню */
+    .secret-question-btn {
+      position: absolute;
+      bottom: max(12px, env(safe-area-inset-bottom));
+      right: max(14px, env(safe-area-inset-right));
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1.5px solid rgba(244, 143, 177, 0.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(216, 27, 96, 0.12);
+      z-index: 25;
+      opacity: 0.6;
+      transition: opacity 0.25s, transform 0.25s, background-color 0.25s, box-shadow 0.25s;
+      animation: secretPulse 3.5s infinite ease-in-out;
+    }
+
+    .secret-question-btn span {
+      font-size: 19px;
+      font-weight: 700;
+      color: var(--accent-deep);
+      font-family: "Georgia", "Times New Roman", serif;
+      line-height: 1;
+    }
+
+    .secret-question-btn:hover,
+    .secret-question-btn:active {
+      opacity: 1;
+      transform: scale(1.1);
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 6px 18px rgba(216, 27, 96, 0.25);
+    }
+
+    @keyframes secretPulse {
+      0%, 100% { transform: scale(1); opacity: 0.6; }
+      50% { transform: scale(1.08); opacity: 0.85; }
+    }
+
+    .menu-header {
+      text-align: center;
+      margin-bottom: 6px;
+      flex-shrink: 0;
+      padding: 0 46px; /* Отступ, чтобы заголовок не наезжал на кнопку музыки */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .menu-title {
+      font-size: clamp(21px, 5.2vw, 26px);
+      font-weight: 700;
+      color: var(--accent-deep);
+      text-shadow: 0 2px 6px rgba(255, 255, 255, 0.95), 0 1px 3px rgba(216, 27, 96, 0.15);
+      font-family: -apple-system, BlinkMacSystemFont, "Georgia", "Times New Roman", serif;
+      letter-spacing: 0.2px;
+      line-height: 1.22;
+      margin: 0;
+    }
+
+    .menu-dedication-box {
+      width: 100%;
+      max-width: 310px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      margin-top: 4px;
+      padding-right: 4px;
+    }
+
+    .dedication-from {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--primary-rose);
+      font-style: italic;
+      letter-spacing: 0.3px;
+      text-align: right;
+      text-shadow: 0 1px 3px rgba(255, 255, 255, 0.85);
+      line-height: 1.35;
+    }
+
+    .dedication-for {
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--text-muted);
+      font-style: italic;
+      text-align: right;
+      margin-top: 1px;
+      opacity: 0.92;
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.85);
+      line-height: 1.35;
+    }
+
+    /* Контейнер креста: 3 ряда на весь экран iPhone без скролла */
+    .cross-menu-container {
+      width: 100%;
+      max-width: 520px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 10px;
+      padding: 6px 0;
+      max-height: 82vh;
+    }
+
+    .cross-row-top,
+    .cross-row-bottom {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      height: 27%;
+    }
+
+    .cross-row-center {
+      display: flex;
+      justify-content: center;
+      height: 38%;
+    }
+
+    /* Плитки меню */
+    .menu-tile {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 10px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s, border-color 0.2s;
+      border: 1.5px solid rgba(244, 143, 177, 0.55);
+      background: var(--bg-pink-card);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 6px 20px rgba(216, 27, 96, 0.08);
+      overflow: hidden;
+    }
+
+    .menu-tile:active {
+      transform: scale(0.96);
+    }
+
+    .menu-tile .tile-icon {
+      font-size: 26px;
+      margin-bottom: 4px;
+      transition: transform 0.25s;
+    }
+
+    .menu-tile .tile-title {
+      font-size: 14px;
+      line-height: 1.25;
+      font-weight: 600;
+      color: var(--accent-deep);
+    }
+
+    /* Центральная плитка (Вкладка 3: Я тебя люблю больше) - САМАЯ КРУПНАЯ */
+    .menu-tile-center {
+      width: 100%;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 235, 240, 0.95) 100%);
+      border: 2px solid rgba(233, 30, 99, 0.5);
+      box-shadow: 0 10px 28px rgba(233, 30, 99, 0.2);
+      border-radius: 24px;
+      position: relative;
+    }
+
+    .menu-tile-center::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 22px;
+      padding: 2px;
+      background: linear-gradient(135deg, rgba(255, 182, 193, 0.6), rgba(216, 27, 96, 0.4));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    .menu-tile-center .tile-icon {
+      font-size: 38px;
+      margin-bottom: 6px;
+      animation: heartBeat 1.8s infinite ease-in-out;
+    }
+
+    .menu-tile-center .tile-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--primary-rose);
+      letter-spacing: 0.3px;
+    }
+
+    .menu-tile-center .tile-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* ========================================================
+       ОБЩАЯ СТРУКТУРА ДЛЯ ВКЛАДОК
+       (Сверху стрелка назад, Слева фото, Справа фото, В центре контент)
+       ======================================================== */
+    .tab-screen {
+      padding: max(10px, env(safe-area-inset-top)) 8px max(10px, env(safe-area-inset-bottom)) 8px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .tab-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 8px 10px 8px;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 40;
+      pointer-events: auto;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--bg-pink-card);
+      border: 1px solid var(--border-pink);
+      color: var(--accent-deep);
+      font-size: 22px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(216, 27, 96, 0.1);
+      transition: transform 0.18s, background-color 0.18s;
+      position: relative;
+      z-index: 45;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      flex-shrink: 0;
+      pointer-events: auto;
+    }
+
+    .back-btn:active {
+      transform: scale(0.92);
+      background: #ffd1dc;
+    }
+
+    .tab-title {
+      font-size: 19px;
+      font-weight: bold;
+      color: var(--accent-deep);
+      text-align: center;
+      flex: 1;
+      padding: 0 10px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      pointer-events: none;
+    }
+
+    .tab-header-spacer {
+      width: 42px;
+      flex-shrink: 0;
+    }
+
+    .tab-music-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--bg-pink-card);
+      border: 1px solid var(--border-pink);
+      color: var(--accent-deep);
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(216, 27, 96, 0.1);
+      transition: transform 0.18s, background-color 0.18s, box-shadow 0.2s, border-color 0.2s;
+      position: relative;
+      z-index: 45;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      flex-shrink: 0;
+      pointer-events: auto;
+    }
+
+    .tab-music-btn:active {
+      transform: scale(0.92);
+      background: #ffd1dc;
+    }
+
+    .tab-music-btn.playing {
+      background: #fff0f5;
+      border-color: var(--primary-rose);
+      box-shadow: 0 0 16px rgba(233, 30, 99, 0.45);
+    }
+
+    .tab-music-btn.playing .tab-music-icon {
+      animation: musicBeat 1.1s infinite alternate ease-in-out;
+    }
+
+    /* 3-колоночный лейаут для контента вкладки */
+    .tab-body-layout {
+      flex: 1;
+      display: flex;
+      align-items: stretch;
+      gap: 10px;
+      min-height: 0;
+      height: 100%;
+      max-height: 100%;
+      width: 100%;
+      max-width: 940px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+
+    /* Боковые фотографии слева и справа: гармоничные пропорции для любых экранов */
+    .side-photo-col {
+      width: clamp(66px, 16vw, 105px);
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      align-self: center;
+      padding: 4px 0;
+    }
+
+    @media (min-width: 600px) {
+      .side-photo-col {
+        width: 135px;
+      }
+    }
+
+    @media (min-width: 840px) {
+      .side-photo-col {
+        width: 170px;
+      }
+    }
+
+    .side-photo-frame {
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      border-radius: 18px;
+      border: 3px solid rgba(255, 255, 255, 0.95);
+      box-shadow: 0 10px 24px rgba(216, 27, 96, 0.16), 0 2px 6px rgba(0, 0, 0, 0.06);
+      overflow: hidden;
+      background: linear-gradient(135deg, #ffd6e0, #ffc2d1);
+      position: relative;
+      cursor: pointer;
+      transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.28s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .side-photo-col-left .side-photo-frame {
+      transform: rotate(-2.5deg);
+    }
+
+    .side-photo-col-right .side-photo-frame {
+      transform: rotate(2.5deg);
+    }
+
+    .side-photo-frame:hover {
+      box-shadow: 0 14px 32px rgba(216, 27, 96, 0.25), 0 4px 10px rgba(0, 0, 0, 0.08);
+      transform: rotate(0deg) scale(1.04);
+      z-index: 10;
+    }
+
+    .side-photo-frame:active {
+      transform: scale(0.96);
+    }
+
+    .side-photo-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center center;
+      display: block;
+      transition: transform 0.35s ease, opacity 0.3s;
+    }
+
+    .side-photo-frame:hover img {
+      transform: scale(1.06);
+    }
+
+    /* Иконка-подсказка "увеличить" в нижнем углу рамки */
+    .side-photo-badge {
+      position: absolute;
+      bottom: 6px;
+      right: 6px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: var(--primary-rose);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.14);
+      pointer-events: none;
+      opacity: 0.9;
+      transition: transform 0.2s, opacity 0.2s;
+    }
+
+    .side-photo-frame:hover .side-photo-badge {
+      transform: scale(1.15);
+      opacity: 1;
+    }
+
+    /* Заглушка, если фото не загружено */
+    .img-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-deep);
+      padding: 6px;
+      text-align: center;
+      font-size: 11px;
+      background: linear-gradient(135deg, #ffeef2 0%, #fedce6 100%);
+    }
+
+    .img-placeholder span {
+      font-size: 22px;
+      margin-bottom: 4px;
+    }
+
+    /* Центральный контент во вкладках */
+    .tab-center-content {
+      flex: 1;
+      min-width: 0;
+      min-height: 0;
+      height: 100%;
+      max-height: 100%;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-pink-card);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--border-pink);
+      border-radius: 22px;
+      box-shadow: var(--shadow-soft);
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* ========================================================
+       ВКЛАДКА 1: ВАЖНЫЕ ДАТЫ
+       ======================================================== */
+    .dates-scroll-list {
+      flex: 1;
+      min-height: 0;
+      height: 100%;
+      max-height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
+      overscroll-behavior-y: contain;
+      padding: 14px 14px 20px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .dates-scroll-list::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .dates-scroll-list::-webkit-scrollbar-track {
+      background: rgba(244, 143, 177, 0.12);
+      border-radius: 999px;
+      margin: 8px 0;
+    }
+
+    .dates-scroll-list::-webkit-scrollbar-thumb {
+      background: rgba(216, 27, 96, 0.4);
+      border-radius: 999px;
+    }
+
+    .dates-scroll-list::-webkit-scrollbar-thumb:hover {
+      background: rgba(216, 27, 96, 0.65);
+    }
+
+    .date-card-item {
+      background: rgba(255, 255, 255, 0.75);
+      border: 1px solid rgba(244, 143, 177, 0.4);
+      border-radius: 16px;
+      padding: 12px 14px;
+      transition: transform 0.15s, background-color 0.2s;
+    }
+
+    .date-card-item:active {
+      background: rgba(255, 255, 255, 0.95);
+    }
+
+    .date-event-header {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--accent-deep);
+      margin-bottom: 4px;
+      line-height: 1.35;
+    }
+
+    .date-label-badge {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #c2185b;
+      background: rgba(255, 192, 203, 0.35);
+      padding: 2px 8px;
+      border-radius: 8px;
+      margin-bottom: 6px;
+    }
+
+    .date-live-counter {
+      font-size: 13px;
+      line-height: 1.45;
+      color: var(--text-muted);
+      font-style: italic;
+      word-break: break-word;
+    }
+
+    .date-live-counter .counter-highlight {
+      color: var(--primary-rose);
+      font-weight: 600;
+      font-style: normal;
+    }
+
+    /* ========================================================
+       ВКЛАДКА 2: ПЕРВЫЙ ТВОЙ ТТ НА МОЙ ТЕЛЕФОН
+       ======================================================== */
+    .video-center-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+      gap: 12px;
+    }
+
+    .video-frame {
+      width: 100%;
+      max-width: 320px;
+      aspect-ratio: 9 / 16;
+      max-height: 68vh;
+      background: #000;
+      border-radius: 20px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      border: 3px solid rgba(255, 255, 255, 0.85);
+    }
+
+    .video-frame video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .video-play-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: opacity 0.3s;
+    }
+
+    .video-play-btn {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      transition: transform 0.2s;
+    }
+
+    .video-play-btn svg {
+      width: 32px;
+      height: 32px;
+      fill: var(--primary-rose);
+      margin-left: 4px;
+    }
+
+    .video-play-overlay:active .video-play-btn {
+      transform: scale(0.9);
+    }
+
+    .video-fallback-box {
+      display: none;
+      padding: 18px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 16px;
+      color: var(--accent-deep);
+      font-size: 14px;
+    }
+
+    .video-download-btn {
+      margin-top: 10px;
+      display: inline-block;
+      padding: 8px 18px;
+      background: var(--primary-rose);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    /* ========================================================
+       ВКЛАДКА 3: Я ТЕБЯ ЛЮБЛЮ БОЛЬШЕ
+       ======================================================== */
+    .love-game-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      text-align: center;
+      gap: 22px;
+    }
+
+    .love-text-above {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--accent-deep);
+      line-height: 1.4;
+      min-height: 32px;
+    }
+
+    .love-main-btn {
+      padding: 22px 34px;
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+      background: linear-gradient(135deg, #ff4081 0%, #d81b60 50%, #ad1457 100%);
+      border: 3px solid rgba(255, 255, 255, 0.9);
+      border-radius: 36px;
+      cursor: pointer;
+      box-shadow: 0 12px 32px rgba(216, 27, 96, 0.4);
+      transition: transform 0.12s, box-shadow 0.15s;
+      max-width: 320px;
+      width: 100%;
+      line-height: 1.35;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .love-main-btn:active {
+      transform: scale(0.95);
+      box-shadow: 0 6px 18px rgba(216, 27, 96, 0.35);
+    }
+
+    .love-equal-message {
+      display: none;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--primary-rose);
+      line-height: 1.5;
+      padding: 24px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 24px;
+      border: 2px dashed var(--primary-rose);
+      box-shadow: 0 12px 36px rgba(216, 27, 96, 0.25);
+      animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.7); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* ========================================================
+       ВКЛАДКА 4: ГАЛЕРЕЯ (30 ФОТО — СЛАЙДЕР И СЕТКА)
+       ======================================================== */
+    /* Переключатель режимов: Слайдер / Сетка всех 30 фото */
+    .gallery-view-switch {
+      display: inline-flex;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid var(--border-pink);
+      border-radius: 999px;
+      padding: 3px;
+      gap: 3px;
+      box-shadow: 0 2px 8px rgba(216, 27, 96, 0.08);
+      position: relative;
+      z-index: 45;
+      touch-action: manipulation;
+      flex-shrink: 0;
+      pointer-events: auto;
+    }
+
+    .view-switch-btn {
+      padding: 6px 13px;
+      font-size: 12.5px;
+      font-weight: 600;
+      border: none;
+      background: transparent;
+      color: var(--accent-deep);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      position: relative;
+      z-index: 46;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      pointer-events: auto;
+    }
+
+    .view-switch-btn.active {
+      background: linear-gradient(135deg, #e91e63, #c2185b);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(194, 24, 91, 0.35);
+    }
+
+    /* РЕЖИМ 1: СЛАЙДЕР С АМБИЕНТ-СВЕЧЕНИЕМ (ДЛЯ ЛЮБЫХ ОРИЕНТАЦИЙ) */
+    .gallery-stage {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      padding: 6px 4px;
+      width: 100%;
+      touch-action: pan-y;
+    }
+
+    .gallery-carousel {
+      width: 100%;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      max-height: 72vh;
+    }
+
+    /* Адаптивная карточка: подходит и для портретных, и для альбомных фото */
+    .gallery-card {
+      position: absolute;
+      width: 82%;
+      max-width: 390px;
+      height: 58vh;
+      max-height: 480px;
+      border-radius: 24px;
+      border: 3.5px solid rgba(255, 255, 255, 0.95);
+      box-shadow: 0 16px 42px rgba(216, 27, 96, 0.16);
+      overflow: hidden;
+      background: #180911;
+      transition: transform 0.38s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.38s ease, box-shadow 0.38s ease;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Задний амбиент-слой: размытая копия самого фото, чтобы не было пустых черных полос */
+    .gallery-ambient-bg {
+      position: absolute;
+      inset: -25px;
+      background-size: cover;
+      background-position: center;
+      filter: blur(28px) brightness(0.82) saturate(1.25);
+      opacity: 0.68;
+      pointer-events: none;
+      transform: scale(1.15);
+      transition: opacity 0.35s ease;
+    }
+
+    /* Переднее фото: 100% не обрезанное, сохраняет идеальные пропорции */
+    .gallery-card img {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      z-index: 2;
+      display: block;
+      transition: transform 0.35s ease;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .gallery-card.current {
+      transform: translateX(0) scale(1);
+      opacity: 1;
+      z-index: 4;
+      box-shadow: 0 20px 48px rgba(216, 27, 96, 0.28);
+    }
+
+    .gallery-card.current:hover img {
+      transform: scale(1.03);
+    }
+
+    .gallery-card.prev {
+      transform: translateX(-68%) scale(0.82);
+      opacity: 0.52;
+      z-index: 3;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .gallery-card.next {
+      transform: translateX(68%) scale(0.82);
+      opacity: 0.52;
+      z-index: 3;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .gallery-card.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.5);
+      z-index: 1;
+    }
+
+    /* Значок зума на фото скрыт по запросу пользователя */
+    .gallery-zoom-badge {
+      display: none !important;
+    }
+
+    .gallery-nav-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid var(--border-pink);
+      color: var(--accent-deep);
+      font-size: 26px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 10;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+      transition: transform 0.15s, background-color 0.15s;
+    }
+
+    .gallery-nav-btn:active {
+      transform: translateY(-50%) scale(0.9);
+      background: #ffd1dc;
+    }
+
+    .gallery-nav-btn.prev-btn { left: 8px; }
+    .gallery-nav-btn.next-btn { right: 8px; }
+
+    /* Нижняя панель со счетчиком и кнопкой раскрытия */
+    .gallery-bottom-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 8px;
+      flex-shrink: 0;
+    }
+
+    .gallery-counter-badge {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--accent-deep);
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 4px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border-pink);
+      box-shadow: 0 2px 8px rgba(216, 27, 96, 0.08);
+    }
+
+    .gallery-fullscreen-btn {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--primary-rose);
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid var(--border-pink);
+      padding: 5px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(216, 27, 96, 0.08);
+      transition: transform 0.15s, background-color 0.15s;
+    }
+
+    .gallery-fullscreen-btn:active {
+      transform: scale(0.95);
+      background: #ffe4ec;
+    }
+
+    /* РЕЖИМ 2: СЕТКА / ПЛИТКА ВСЕХ 30 ФОТОГРАФИЙ */
+    .gallery-grid-stage {
+      flex: 1;
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 10px 8px 24px 8px;
+    }
+
+    .gallery-grid-masonry {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    @media (min-width: 520px) {
+      .gallery-grid-masonry {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+      }
+    }
+
+    @media (min-width: 800px) {
+      .gallery-grid-masonry {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+      }
+    }
+
+    .gallery-grid-item {
+      position: relative;
+      aspect-ratio: 1 / 1;
+      border-radius: 18px;
+      border: 2.5px solid rgba(255, 255, 255, 0.95);
+      overflow: hidden;
+      background: #fedce6;
+      box-shadow: 0 4px 14px rgba(216, 27, 96, 0.12);
+      cursor: pointer;
+      transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.22s ease;
+    }
+
+    .gallery-grid-item:hover {
+      transform: scale(1.03);
+      box-shadow: 0 8px 22px rgba(216, 27, 96, 0.24);
+      z-index: 5;
+    }
+
+    .gallery-grid-item:active {
+      transform: scale(0.96);
+    }
+
+    .gallery-grid-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+      transition: transform 0.35s ease;
+    }
+
+    .gallery-grid-item:hover img {
+      transform: scale(1.06);
+    }
+
+    .gallery-grid-badge {
+      position: absolute;
+      bottom: 6px;
+      right: 6px;
+      font-size: 10.5px;
+      font-weight: 700;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      padding: 1px 7px;
+      border-radius: 8px;
+      pointer-events: none;
+    }
+
+    /* ========================================================
+       ВКЛАДКА 5: ПИСЬМО ОТ СЕНИ (ПЕЧАТНАЯ МАШИНКА)
+       ======================================================== */
+    .letter-container {
+      flex: 1;
+      min-height: 0;
+      height: 100%;
+      max-height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
+      overscroll-behavior-y: contain;
+      padding: 18px 16px 24px 16px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .letter-container::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .letter-container::-webkit-scrollbar-track {
+      background: rgba(244, 143, 177, 0.12);
+      border-radius: 999px;
+      margin: 8px 0;
+    }
+
+    .letter-container::-webkit-scrollbar-thumb {
+      background: rgba(216, 27, 96, 0.4);
+      border-radius: 999px;
+    }
+
+    .letter-paper {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 18px;
+      border: 1px solid rgba(244, 143, 177, 0.4);
+      padding: 20px 18px;
+      box-shadow: inset 0 2px 8px rgba(216, 27, 96, 0.04);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .letter-text-content {
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--text-main);
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: "Georgia", "Times New Roman", serif;
+      font-style: italic;
+    }
+
+    .typewriter-cursor {
+      display: inline-block;
+      width: 2px;
+      height: 1.1em;
+      background: var(--primary-rose);
+      margin-left: 2px;
+      vertical-align: text-bottom;
+      animation: blinkCursor 0.8s infinite;
+    }
+
+    @keyframes blinkCursor {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .letter-controls {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .letter-btn {
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent-deep);
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid var(--border-pink);
+      border-radius: 999px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+      transition: background-color 0.18s, transform 0.15s;
+    }
+
+    .letter-btn:active {
+      transform: scale(0.95);
+      background: #fedbe6;
+    }
+
+    /* Модальное окно просмотра фото в полном размере (Lightbox) */
+    .lightbox-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(14, 5, 11, 0.93);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      z-index: 1000;
+      display: none;
+      visibility: hidden;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+      touch-action: pan-y;
+    }
+
+    .lightbox-modal.active {
+      display: flex;
+      visibility: visible;
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .lightbox-top-bar {
+      position: absolute;
+      top: max(12px, env(safe-area-inset-top));
+      left: 16px;
+      right: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 1010;
+    }
+
+    .lightbox-counter {
+      color: #fff;
+      font-size: 13.5px;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.22);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      padding: 6px 14px;
+      border-radius: 999px;
+      letter-spacing: 0.3px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    .lightbox-close-btn {
+      color: #fff;
+      font-size: 26px;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.24);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.18s, background-color 0.18s;
+      line-height: 1;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    .lightbox-close-btn:active {
+      transform: scale(0.9);
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    .lightbox-img-box {
+      position: relative;
+      max-width: 94%;
+      max-height: 78vh;
+      border-radius: 20px;
+      border: 3.5px solid rgba(255, 255, 255, 0.92);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.65);
+      overflow: hidden;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: lightboxPop 0.26s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    @keyframes lightboxPop {
+      0% { transform: scale(0.92); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .lightbox-img {
+      max-width: 100%;
+      max-height: 78vh;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      display: block;
+      user-select: none;
+      -webkit-user-select: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .lightbox-nav-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      color: #fff;
+      font-size: 28px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 105;
+      transition: transform 0.15s, background-color 0.15s;
+    }
+
+    .lightbox-nav-btn:active {
+      transform: translateY(-50%) scale(0.92);
+      background: rgba(255, 255, 255, 0.45);
+    }
+
+    .lightbox-prev-btn { left: 10px; }
+    .lightbox-next-btn { right: 10px; }
+
+    .lightbox-hint {
+      position: absolute;
+      bottom: max(12px, env(safe-area-inset-bottom));
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 12px;
+      letter-spacing: 0.2px;
+      pointer-events: none;
+      text-align: center;
+      padding: 0 16px;
+    }
+
+    /* ========================================================
+       СТИЛИ ДЛЯ СЕКРЕТНОЙ ИГРЫ «ПОЙМАЙ МОИ СЛОВА»
+       ======================================================== */
+    .secret-game-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+      border-radius: 22px;
+      background: var(--bg-pink-card);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--border-pink);
+      box-shadow: var(--shadow-soft);
+      min-height: 0;
+    }
+
+    .secret-game-area {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      min-height: 0;
+    }
+
+    /* Падающее слово */
+    .falling-word {
+      position: absolute;
+      top: -50px;
+      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1.5px solid rgba(244, 143, 177, 0.7);
+      border-radius: 999px;
+      color: var(--accent-deep);
+      font-family: -apple-system, BlinkMacSystemFont, "Georgia", "Times New Roman", serif;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 4px 14px rgba(216, 27, 96, 0.16);
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+      white-space: nowrap;
+      max-width: 88vw;
+      z-index: 10;
+      animation-name: fallWordAnim;
+      animation-timing-function: linear;
+      animation-fill-mode: forwards;
+      transition: transform 0.15s, opacity 0.2s;
+    }
+
+    .secret-game-title {
+      font-size: 13.5px !important;
+      line-height: 1.25 !important;
+      white-space: normal !important;
+      overflow: visible !important;
+      text-overflow: clip !important;
+      font-weight: 600 !important;
+      padding: 0 4px !important;
+    }
+
+    .falling-word:active {
+      transform: scale(0.92);
+    }
+
+    .falling-word.popped {
+      pointer-events: none;
+      opacity: 0 !important;
+      transition: transform 0.22s ease-out, opacity 0.22s ease-out !important;
+    }
+
+    .catch-burst-effect {
+      position: fixed;
+      transform: translate(-50%, -50%);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--primary-rose);
+      text-shadow: 0 2px 6px rgba(255, 255, 255, 0.95), 0 0 12px rgba(233, 30, 99, 0.4);
+      pointer-events: none;
+      z-index: 100;
+      animation: catchBurstFloat 0.55s ease-out forwards;
+    }
+
+    @keyframes catchBurstFloat {
+      0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.8);
+      }
+      50% {
+        opacity: 1;
+        transform: translate(-50%, -85%) scale(1.25);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -120%) scale(1.4);
+      }
+    }
+
+    @keyframes fallWordAnim {
+      0% {
+        transform: translateY(0);
+        opacity: 0;
+      }
+      8% {
+        opacity: 1;
+      }
+      88% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(var(--fall-dist, calc(100vh - 170px)));
+        opacity: 0;
+      }
+    }
+
+    /* Нижняя панель с конвертом и счетчиком */
+    .secret-bottom-bar {
+      height: 64px;
+      background: rgba(255, 255, 255, 0.94);
+      border-top: 1px solid var(--border-pink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 0 16px;
+      flex-shrink: 0;
+      z-index: 15;
+    }
+
+    .secret-envelope {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #fff0f5;
+      border: 1.5px solid rgba(244, 143, 177, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      box-shadow: 0 3px 10px rgba(216, 27, 96, 0.12);
+      transition: transform 0.2s;
+    }
+
+    .secret-envelope.bounce {
+      animation: envelopeBounce 0.4s ease-out;
+    }
+
+    @keyframes envelopeBounce {
+      0% { transform: scale(1); }
+      35% { transform: scale(1.28); background: #ffe4ec; }
+      100% { transform: scale(1); }
+    }
+
+    .secret-counter-text {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--accent-deep);
+    }
+
+    /* Финальное окно победы */
+    .secret-victory-modal {
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 240, 245, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 50;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .secret-victory-modal.active {
+      display: flex;
+      animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .secret-victory-card {
+      width: 100%;
+      max-width: 420px;
+      padding: 32px 24px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 14px 40px rgba(216, 27, 96, 0.25);
+    }
+
+    .secret-victory-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--primary-rose);
+    }
+
+    .secret-victory-desc {
+      font-size: 17px;
+      line-height: 1.55;
+      color: var(--accent-deep);
+      font-style: italic;
+    }
+
+    .secret-victory-btns {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      gap: 8px;
+      margin-top: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Холст для бесконечно летящих вверх романтических сердечек -->
+  <canvas id="hearts-canvas"></canvas>
+
+  <!-- Скрытый аудио-элемент для романтической мелодии (всегда доступен во всех вкладках) -->
+  <audio id="romantic-audio" src="images/music.mp3" loop preload="auto" playsinline webkit-playsinline onerror="handleAudioError()"></audio>
+
+  <!-- ========================================================
+       ФОНОВОЕ СЛАЙД-ШОУ ДЛЯ ЭКРАНА 1 (photo1, photo2, photo3)
+       ======================================================== -->
+  <div id="bg-loading-slideshow" class="bg-slideshow">
+    <img id="load-bg-1" src="images/photo1.jpg" class="active" alt="Фон 1" onerror="handleBgImgError(this)" />
+    <img id="load-bg-2" src="images/photo2.jpg" alt="Фон 2" onerror="handleBgImgError(this)" />
+    <img id="load-bg-3" src="images/photo3.jpg" alt="Фон 3" onerror="handleBgImgError(this)" />
+  </div>
+
+  <!-- ========================================================
+       ФОНОВОЕ СЛАЙД-ШОУ ДЛЯ ЭКРАНА 2 (photo4, photo5, photo6)
+       ======================================================== -->
+  <div id="bg-password-slideshow" class="bg-slideshow" style="display: none;">
+    <img id="pass-bg-1" src="images/photo4.jpg" class="active" alt="Фон 4" onerror="handleBgImgError(this)" />
+    <img id="pass-bg-2" src="images/photo5.jpg" alt="Фон 5" onerror="handleBgImgError(this)" />
+    <img id="pass-bg-3" src="images/photo6.jpg" alt="Фон 6" onerror="handleBgImgError(this)" />
+  </div>
+
+  <!-- ========================================================
+       ЭКРАН 1: ЗАГРУЗКА (15 секунд)
+       ======================================================== -->
+  <section id="screen-loading" class="screen active">
+    <div class="glass-card loading-container">
+      <div class="heart-pulse-icon">💖</div>
+      <div id="loading-status-text" class="loading-text">
+        Загружаю всю свою любовь к тебе...
+      </div>
+      <div class="progress-bar-wrap">
+        <div id="loading-progress-bar" class="progress-bar-fill"></div>
+      </div>
+      <div id="loading-counter-text" class="loading-subtext">Подожди чуть-чуть...</div>
+    </div>
+  </section>
+
+  <!-- ========================================================
+       ЭКРАН 2: ПАРОЛЬ (404 дня)
+       ======================================================== -->
+  <section id="screen-password" class="screen">
+    <div class="glass-card password-card">
+      <div style="font-size: 42px;">🔐</div>
+      <h2 class="password-question">
+        Насколько я тебя старше? Введи точное число дней.
+      </h2>
+      <div class="password-input-group">
+        <input
+          type="text"
+          id="password-input"
+          class="password-input"
+          inputmode="numeric"
+          pattern="[0-9]*"
+          placeholder="Число..."
+          autocomplete="off"
+          autocorrect="off"
+          maxlength="8"
+        />
+        <button id="password-submit-btn" class="password-btn">Войти ❤️</button>
+      </div>
+      <div id="password-error-msg" class="password-error"></div>
+    </div>
+  </section>
+
+  <!-- ========================================================
+       ЭКРАН 3: ГЛАВНОЕ МЕНЮ (5 ВКЛАДОК КРЕСТОМ)
+       ======================================================== -->
+  <section id="screen-menu" class="screen">
+    <!-- Кнопка включения/выключения музыки с иконкой ноты в углу меню -->
+    <button
+      id="music-toggle-btn"
+      class="music-toggle-btn"
+      onclick="toggleRomanticMusic()"
+      aria-label="Включить романтическую мелодию"
+      title="Романтическая музыка для Сони"
+    >
+      <span id="music-btn-icon" class="music-icon">🎵</span>
+    </button>
+
+    <header class="menu-header">
+      <h1 class="menu-title">С днем рождения, Сонечка</h1>
+      <div class="menu-dedication-box">
+        <div class="dedication-from">От Сени 💕</div>
+        <div class="dedication-for">Это все для тебя.</div>
+      </div>
+    </header>
+
+    <div class="cross-menu-container">
+      <!-- Верхний ряд креста: Слева Вкладка 1, Справа Вкладка 2 -->
+      <div class="cross-row-top">
+        <!-- Вкладка 1: Важные даты -->
+        <div class="menu-tile" onclick="openTab('tab-dates')">
+          <div class="tile-icon">🗓️</div>
+          <div class="tile-title">Важные даты</div>
+        </div>
+
+        <!-- Вкладка 2: Первый твой тт на мой телефон -->
+        <div class="menu-tile" onclick="openTab('tab-tiktok')">
+          <div class="tile-icon">🎬</div>
+          <div class="tile-title">Первый твой тт на мой телефон</div>
+        </div>
+      </div>
+
+      <!-- Центральный ряд креста: Вкладка 3 (КРУПНЕЕ ОСТАЛЬНЫХ) -->
+      <div class="cross-row-center">
+        <!-- Вкладка 3: Я тебя люблю больше -->
+        <div class="menu-tile menu-tile-center" onclick="openTab('tab-lovemore')">
+          <div class="tile-icon">❤️</div>
+          <div class="tile-title">Я тебя люблю больше</div>
+          <div class="tile-subtitle">Нажми, чтобы проверить 💕</div>
+        </div>
+      </div>
+
+      <!-- Нижний ряд креста: Слева Вкладка 4, Справа Вкладка 5 -->
+      <div class="cross-row-bottom">
+        <!-- Вкладка 4: Галерея -->
+        <div class="menu-tile" onclick="openTab('tab-gallery')">
+          <div class="tile-icon">📸</div>
+          <div class="tile-title">Галерея</div>
+        </div>
+
+        <!-- Вкладка 5: Письмо от Сени -->
+        <div class="menu-tile" onclick="openLetterTab()">
+          <div class="tile-icon">💌</div>
+          <div class="tile-title">Письмо от Сени</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Секретный значок вопроса в правом нижнем углу меню -->
+    <button
+      id="secret-question-btn"
+      class="secret-question-btn"
+      onclick="openSecretTab()"
+      aria-label="Секретная вкладка"
+      title="Секрет..."
+    >
+      <span>?</span>
+    </button>
+  </section>
+
+  <!-- ========================================================
+       ВКЛАДКА 1: ВАЖНЫЕ ДАТЫ
+       Слева photo1.jpg, Справа photo2.jpg, В центре счётчики
+       ======================================================== -->
+  <section id="tab-dates" class="screen tab-screen">
+    <header class="tab-header">
+      <button class="back-btn" onclick="backToMenu()" aria-label="Назад">←</button>
+      <h2 class="tab-title">Важные даты</h2>
+      <button class="tab-music-btn" onclick="toggleRomanticMusic()" aria-label="Музыка" title="Включить / выключить музыку">
+        <span class="tab-music-icon">🎵</span>
+      </button>
+    </header>
+
+    <div class="tab-body-layout">
+      <!-- Фото слева: photo1.jpg -->
+      <div class="side-photo-col side-photo-col-left">
+        <div class="side-photo-frame" onclick="openLightbox('images/photo1.jpg')" title="Нажмите, чтобы открыть фото">
+          <img src="images/photo1.jpg" alt="Фото слева" onerror="handleSideImgError(this, 'photo1.jpg')" />
+          <span class="side-photo-badge">🔍</span>
+        </div>
+      </div>
+
+      <!-- Центр: Список дат с живым таймером -->
+      <div class="tab-center-content">
+        <div id="dates-list" class="dates-scroll-list">
+          <!-- Генерируется из JavaScript массива importantDates -->
+        </div>
+      </div>
+
+      <!-- Фото справа: photo2.jpg -->
+      <div class="side-photo-col side-photo-col-right">
+        <div class="side-photo-frame" onclick="openLightbox('images/photo2.jpg')" title="Нажмите, чтобы открыть фото">
+          <img src="images/photo2.jpg" alt="Фото справа" onerror="handleSideImgError(this, 'photo2.jpg')" />
+          <span class="side-photo-badge">🔍</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================
+       ВКЛАДКА 2: ПЕРВЫЙ ТВОЙ ТТ НА МОЙ ТЕЛЕФОН
+       Слева photo3.jpg, Справа photo4.jpg, В центре видео video1.mp4
+       ======================================================== -->
+  <section id="tab-tiktok" class="screen tab-screen">
+    <header class="tab-header">
+      <button class="back-btn" onclick="backToMenu()" aria-label="Назад">←</button>
+      <h2 class="tab-title">Первый твой тт на мой телефон</h2>
+      <button class="tab-music-btn" onclick="toggleRomanticMusic()" aria-label="Музыка" title="Включить / выключить музыку">
+        <span class="tab-music-icon">🎵</span>
+      </button>
+    </header>
+
+    <div class="tab-body-layout">
+      <!-- Фото слева: photo3.jpg -->
+      <div class="side-photo-col side-photo-col-left">
+        <div class="side-photo-frame" onclick="openLightbox('images/photo3.jpg')" title="Нажмите, чтобы открыть фото">
+          <img src="images/photo3.jpg" alt="Фото слева" onerror="handleSideImgError(this, 'photo3.jpg')" />
+          <span class="side-photo-badge">🔍</span>
+        </div>
+      </div>
+
+      <!-- Центр: Видео video1.mp4 -->
+      <div class="tab-center-content">
+        <div class="video-center-container">
+          <div class="video-frame" id="video-frame-box">
+            <video
+              id="tiktok-video"
+              src="images/video1.mp4"
+              playsinline
+              webkit-playsinline
+              controls
+              preload="metadata"
+              onerror="handleVideoError()"
+            ></video>
+            <div id="video-overlay" class="video-play-overlay" onclick="startVideoPlay()">
+              <div class="video-play-btn">
+                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              </div>
+            </div>
+          </div>
+          <div id="video-fallback" class="video-fallback-box">
+            <p>🎬 Видео готовится к просмотру или файл <b>images/video1.mp4</b> ещё не положен в папку.</p>
+            <a href="images/video1.mp4" download class="video-download-btn">Скачать / Открыть видео</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Фото справа: photo4.jpg -->
+      <div class="side-photo-col side-photo-col-right">
+        <div class="side-photo-frame" onclick="openLightbox('images/photo4.jpg')" title="Нажмите, чтобы открыть фото">
+          <img src="images/photo4.jpg" alt="Фото справа" onerror="handleSideImgError(this, 'photo4.jpg')" />
+          <span class="side-photo-badge">🔍</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================
+       ВКЛАДКА 3: Я ТЕБЯ ЛЮБЛЮ БОЛЬШЕ
+       Слева photo5.jpg, Справа photo6.jpg, В центре игра кликов
+       ======================================================== -->
+  <section id="tab-lovemore" class="screen tab-screen">
+    <header class="tab-header">
+      <button class="back-btn" onclick="backToMenu()" aria-label="Назад">←</button>
+      <h2 class="tab-title">Я тебя люблю больше</h2>
+      <button class="tab-music-btn" onclick="toggleRomanticMusic()" aria-label="Музыка" title="Включить / выключить музыку">
+        <span class="tab-music-icon">🎵</span>
+      </button>
+    </header>
+
+    <div class="tab-body-layout">
+      <!-- Фото слева: photo5.jpg -->
+      <div class="side-photo-col side-photo-col-left">
+        <div class="side-photo-frame" onclick="openLightbox('images/photo5.jpg')" title="Нажмите, чтобы открыть фото">
+          <img src="images/photo5.jpg" alt="Фото слева" onerror="handleSideImgError(this, 'photo5.jpg')" />
+          <span class="side-photo-badge">🔍</span>
+        </div>
+      </div>
+
+      <!-- Центр: Большая кнопка с кликером -->
+      <div class="tab-center-content">
+        <div class="love-game-container">
+          <div id="love-text-above" class="love-text-above">
+            Я тебя люблю 1 раз
+          </div>
+
+          <button id="love-main-btn" class="love-main-btn" onclick="handleLoveClick()">
+            Ты меня любишь 0 раз
+          </button>
+
+          <div id="love-equal-message" class="love-equal-message">
+            Ладно, мы любим друг друга одинаково ❤️
+          </div>
+        </div>
+      </div>
+
+      <!-- Фото справа: photo6.jpg -->
+      <div class="side-photo-col side-photo-col-right">
+        <div class="side-photo-frame" onclick="openLightbox('images/photo6.jpg')" title="Нажмите, чтобы открыть фото">
+          <img src="images/photo6.jpg" alt="Фото справа" onerror="handleSideImgError(this, 'photo6.jpg')" />
+          <span class="side-photo-badge">🔍</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================
+       ВКЛАДКА 4: ГАЛЕРЕЯ
+       Слайдер с амбиент-свечением и Сетка всех 30 фотографий
+       (photo9.jpg ... photo38.jpg, ровно 30 штук)
+       ======================================================== -->
+  <section id="tab-gallery" class="screen tab-screen">
+    <header class="tab-header">
+      <button class="back-btn" onclick="backToMenu()" aria-label="Назад">←</button>
+      <h2 class="tab-title">Галерея</h2>
+      <button class="tab-music-btn" onclick="toggleRomanticMusic()" aria-label="Музыка" title="Включить / выключить музыку">
+        <span class="tab-music-icon">🎵</span>
+      </button>
+    </header>
+
+    <!-- Слайдер всех 30 фотографий с амбиентным свечением и полноэкранным режимом -->
+    <div class="gallery-stage" id="gallery-carousel-stage">
+      <!-- Кнопка "Предыдущее фото" -->
+      <button class="gallery-nav-btn prev-btn" onclick="prevGalleryPhoto()" aria-label="Предыдущее">‹</button>
+
+      <!-- Контейнер с полупрозрачными соседними фотографиями -->
+      <div class="gallery-carousel" id="gallery-touch-stage">
+        <div id="gallery-card-prev" class="gallery-card prev" onclick="prevGalleryPhoto()">
+          <div class="gallery-ambient-bg" id="gallery-bg-prev"></div>
+          <img id="gallery-img-prev" alt="Предыдущее фото" onerror="handleGalleryImgError(this)" />
+        </div>
+        <div id="gallery-card-curr" class="gallery-card current" onclick="openCurrentInLightbox()">
+          <div class="gallery-ambient-bg" id="gallery-bg-curr"></div>
+          <img id="gallery-img-curr" alt="Текущее фото" onerror="handleGalleryImgError(this)" />
+        </div>
+        <div id="gallery-card-next" class="gallery-card next" onclick="nextGalleryPhoto()">
+          <div class="gallery-ambient-bg" id="gallery-bg-next"></div>
+          <img id="gallery-img-next" alt="Следующее фото" onerror="handleGalleryImgError(this)" />
+        </div>
+      </div>
+
+      <!-- Кнопка "Следующее фото" -->
+      <button class="gallery-nav-btn next-btn" onclick="nextGalleryPhoto()" aria-label="Следующее">›</button>
+
+      <!-- Нижняя панель: счётчик и кнопка раскрытия на весь экран -->
+      <div class="gallery-bottom-bar">
+        <div id="gallery-counter" class="gallery-counter-badge">Фото 1 из 30</div>
+        <button class="gallery-fullscreen-btn" onclick="openCurrentInLightbox()">⛶ На весь экран</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================
+       ВКЛАДКА 5: ПИСЬМО ОТ СЕНИ
+       Слева photo7.jpg, Справа photo8.jpg, В центре эффект машинки
+       ======================================================== -->
+  <section id="tab-letter" class="screen tab-screen">
+    <header class="tab-header">
+      <button class="back-btn" onclick="backToMenu()" aria-label="Назад">←</button>
+      <h2 class="tab-title">Письмо от Сени</h2>
+      <button class="tab-music-btn" onclick="toggleRomanticMusic()" aria-label="Музыка" title="Включить / выключить музыку">
+        <span class="tab-music-icon">🎵</span>
+      </button>
+    </header>
+
+    <div class="tab-body-layout">
+      <!-- Фото слева: photo7.jpg -->
+      <div class="side-photo-col side-photo-col-left">
+        <div class="side-photo-frame" onclick="openLightbox('images/photo7.jpg')" title="Нажмите, чтобы открыть фото">
+          <img src="images/photo7.jpg" alt="Фото слева" onerror="handleSideImgError(this, 'photo7.jpg')" />
+          <span class="side-photo-badge">🔍</span>
+        </div>
+      </div>
+
+      <!-- Центр: Текст письма с эффектом печати -->
+      <div class="tab-center-content">
+        <div class="letter-container">
+          <div class="letter-paper">
+            <div class="letter-text-content">
+              <span id="letter-typed-text"></span><span id="typewriter-cursor" class="typewriter-cursor"></span>
+            </div>
+            <div class="letter-controls">
+              <button class="letter-btn" onclick="restartTypewriter()">Перечитать сначала ↺</button>
+              <button class="letter-btn" onclick="showFullLetter()">Показать весь текст</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Фото справа: photo8.jpg -->
+      <div class="side-photo-col side-photo-col-right">
+        <div class="side-photo-frame" onclick="openLightbox('images/photo8.jpg')" title="Нажмите, чтобы открыть фото">
+          <img src="images/photo8.jpg" alt="Фото справа" onerror="handleSideImgError(this, 'photo8.jpg')" />
+          <span class="side-photo-badge">🔍</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================
+       ВКЛАДКА 5 (ШАГ 1): ПАРОЛЬ ДЛЯ «ПИСЬМА ОТ СЕНИ»
+       ======================================================== -->
+  <section id="tab-letter-password" class="screen tab-screen">
+    <header class="tab-header">
+      <button class="back-btn" onclick="backToMenu()" aria-label="Назад">←</button>
+      <h2 class="tab-title">Письмо от Сени 💌</h2>
+      <button class="tab-music-btn" onclick="toggleRomanticMusic()" aria-label="Музыка" title="Включить / выключить музыку">
+        <span class="tab-music-icon">🎵</span>
+      </button>
+    </header>
+
+    <div style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px;">
+      <div class="glass-card password-card">
+        <div style="font-size: 46px; animation: heartBeat 1.6s infinite ease-in-out;">💌</div>
+        <h2 class="password-question">Чтобы открыть письмо, введи пароль 💕</h2>
+        <div class="password-input-group">
+          <input
+            type="text"
+            id="letter-password-input"
+            class="password-input"
+            placeholder="Введи пароль..."
+            autocomplete="off"
+            autocorrect="off"
+          />
+          <button id="letter-password-btn" class="password-btn" onclick="checkLetterPassword()">Открыть ❤️</button>
+        </div>
+        <div id="letter-password-error-msg" class="password-error"></div>
+        <p style="font-size: 13px; color: var(--text-muted); margin-top: 10px; margin-bottom: 0;">
+          Подсказка: пароль можно получить, выиграв в секретную игру в правом нижнем углу меню 🤫
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================
+       СЕКРЕТНАЯ ВКЛАДКА: ИГРА «ПОЙМАЙ МОИ СЛОВА» (БЕЗ ПАРОЛЯ)
+       ======================================================== -->
+  <section id="tab-secret-game" class="screen tab-screen" style="padding-bottom: 0;">
+    <header class="tab-header">
+      <button class="back-btn" onclick="backToMenu()" aria-label="Назад">←</button>
+      <h2 class="tab-title secret-game-title">Тебе нужно поймать всего 20 причин по которым я тебя люблю(из миллиона)</h2>
+      <button class="tab-music-btn" onclick="toggleRomanticMusic()" aria-label="Музыка" title="Включить / выключить музыку">
+        <span class="tab-music-icon">🎵</span>
+      </button>
+    </header>
+
+    <div class="secret-game-wrapper">
+      <!-- Игровая зона с падающими словами -->
+      <div id="secret-game-area" class="secret-game-area"></div>
+
+      <!-- Нижняя панель с конвертом и счетчиком -->
+      <div class="secret-bottom-bar">
+        <div id="secret-envelope-icon" class="secret-envelope">
+          <span>💌</span>
+        </div>
+        <div class="secret-counter-text">
+          Поймано: <span id="secret-counter-num" class="counter-highlight">0</span> из <span id="secret-counter-target">20</span>
+        </div>
+      </div>
+
+      <!-- Модальное окно победы -->
+      <div id="secret-victory-modal" class="secret-victory-modal">
+        <div class="glass-card secret-victory-card">
+          <div style="font-size: 52px; animation: heartBeat 1.4s infinite ease-in-out;">💌</div>
+          <h3 class="secret-victory-title" style="margin-bottom: 8px;">Молодец ты выиграла</h3>
+          <p id="secret-victory-text" class="secret-victory-desc" style="font-size: 15px; margin-bottom: 16px; color: var(--accent-deep); line-height: 1.45;">
+            Пароль для "Письма от Сени":<br>
+            <span class="counter-highlight" style="display: inline-block; margin-top: 6px; padding: 5px 16px; background: rgba(255, 255, 255, 0.95); border: 1.5px solid var(--primary-rose); border-radius: 999px; font-size: 17px; font-weight: 700; color: var(--primary-rose); user-select: all;">Сонечка лучшая</span>
+          </p>
+          <div class="secret-victory-btns">
+            <button class="password-btn" onclick="openLetterTab()" style="width: 100%; margin-bottom: 8px;">Перейти к «Письму от Сени» 💌</button>
+            <button class="letter-btn" onclick="backToMenu()" style="width: 100%;">Вернуться в меню ❤️</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Полноэкранный просмотрщик фото при тапе (Lightbox) -->
+  <div id="lightbox-modal" class="lightbox-modal" onclick="closeLightbox()">
+    <div class="lightbox-top-bar" onclick="event.stopPropagation()">
+      <div id="lightbox-counter" class="lightbox-counter">Фото 1 из 30</div>
+      <button class="lightbox-close-btn" onclick="closeLightbox()" aria-label="Закрыть">&times;</button>
+    </div>
+
+    <!-- Кнопка перехода к предыдущему фото в Lightbox -->
+    <button id="lightbox-prev-btn" class="lightbox-nav-btn lightbox-prev-btn" onclick="event.stopPropagation(); prevLightboxPhoto();" aria-label="Предыдущее">‹</button>
+
+    <div class="lightbox-img-box" id="lightbox-img-box" onclick="event.stopPropagation()">
+      <img id="lightbox-img" class="lightbox-img" src="" alt="Фото в полном размере" />
+    </div>
+
+    <!-- Кнопка перехода к следующему фото в Lightbox -->
+    <button id="lightbox-next-btn" class="lightbox-nav-btn lightbox-next-btn" onclick="event.stopPropagation(); nextLightboxPhoto();" aria-label="Следующее">›</button>
+
+    <div class="lightbox-hint">Свайпай влево/вправо для переключения или нажми вне фото для выхода</div>
+  </div>
+
+  <!-- ========================================================
+       ВСТРОЕННЫЙ JAVASCRIPT: ВСЯ ЛОГИКА В ОДНОМ МЕСТЕ
+       ======================================================== -->
+  <script>
+    /* =====================================================================
+       ДАННЫЕ: ВАЖНЫЕ ДАТЫ
+       Здесь ты можешь легко добавлять, удалять или изменять даты!
+       Время для всех дат установлено на 00:00:00.
+       ===================================================================== */
+    const importantDates = [
+      {
+        title: "первая встреча",
+        displayDate: "25 апреля 2024",
+        date: new Date(2024, 3, 25, 0, 0, 0) // Месяцы в JS: 0=январь, 3=апрель
+      },
+      {
+        title: "вторая встреча (ключевая)",
+        displayDate: "12 декабря 2024",
+        date: new Date(2024, 11, 12, 0, 0, 0)
+      },
+      {
+        title: "первое сообщение",
+        displayDate: "13 декабря 2024",
+        date: new Date(2024, 11, 13, 0, 0, 0)
+      },
+      {
+        title: "первая денежная помощь",
+        displayDate: "13 декабря 2024",
+        date: new Date(2024, 11, 13, 0, 0, 0)
+      },
+      {
+        title: "первый раз красуешься в кружке",
+        displayDate: "15 декабря 2024",
+        date: new Date(2024, 11, 15, 0, 0, 0)
+      },
+      {
+        title: "первая гулянка",
+        displayDate: "3 января 2025",
+        date: new Date(2025, 0, 3, 0, 0, 0)
+      },
+      {
+        title: "первый раз пришёл тебя навестить в больницу",
+        displayDate: "20 февраля 2025",
+        date: new Date(2025, 1, 20, 0, 0, 0)
+      },
+      {
+        title: "звёздная дата, начало любви до гроба",
+        displayDate: "22 февраля 2025",
+        date: new Date(2025, 1, 22, 0, 0, 0)
+      },
+      {
+        title: "первое признание в любви",
+        displayDate: "24 февраля 2025",
+        date: new Date(2025, 1, 24, 0, 0, 0)
+      },
+      {
+        title: "первый поцелуй",
+        displayDate: "13 марта 2025",
+        date: new Date(2025, 2, 13, 0, 0, 0)
+      },
+      {
+        title: "первый раз у меня дома",
+        displayDate: "14 марта 2025",
+        date: new Date(2025, 2, 14, 0, 0, 0)
+      },
+      {
+        title: "первый наш тик ток",
+        displayDate: "15 марта 2025",
+        date: new Date(2025, 2, 15, 0, 0, 0)
+      },
+      {
+        title: "первая совместная ава",
+        displayDate: "3 апреля 2025",
+        date: new Date(2025, 3, 3, 0, 0, 0)
+      },
+      {
+        title: "первый раз гуляли за руки",
+        displayDate: "5 апреля 2025",
+        date: new Date(2025, 3, 5, 0, 0, 0)
+      },
+      {
+        title: "первая твоя встреча с моей мамой",
+        displayDate: "16 мая 2025",
+        date: new Date(2025, 4, 16, 0, 0, 0)
+      },
+      {
+        title: "первый раз приехал в Елово",
+        displayDate: "27 июня 2025",
+        date: new Date(2025, 5, 27, 0, 0, 0)
+      },
+      {
+        title: "первый раз вместе гуляли ночью",
+        displayDate: "28 июня 2025",
+        date: new Date(2025, 5, 28, 0, 0, 0)
+      },
+      {
+        title: "я первый раз на большом празднике твоей семьи",
+        displayDate: "17 августа 2025",
+        date: new Date(2025, 7, 17, 0, 0, 0)
+      },
+      {
+        title: "первый раз играла у меня на пк",
+        displayDate: "12 сентября 2025",
+        date: new Date(2025, 8, 12, 0, 0, 0)
+      },
+      {
+        title: "первый раз сходили на культурное мероприятие",
+        displayDate: "20 сентября 2025",
+        date: new Date(2025, 8, 20, 0, 0, 0)
+      },
+      {
+        title: "первый раз довела меня до слёз (чёрная маска)",
+        displayDate: "26 сентября 2025",
+        date: new Date(2025, 8, 26, 0, 0, 0)
+      },
+      {
+        title: "первая твоя встреча с Вероникой",
+        displayDate: "9 мая 2026",
+        date: new Date(2026, 4, 9, 0, 0, 0)
+      },
+      {
+        title: "первая твоя поездка в Губаху",
+        displayDate: "4 июля 2026",
+        date: new Date(2026, 6, 4, 0, 0, 0)
+      }
+    ];
+
+    /* =====================================================================
+       ДАННЫЕ: МАССИВ ФОТОГРАФИЙ ДЛЯ ГАЛЕРЕИ (30 ШТУК: photo9.jpg ... photo38.jpg)
+       Код адаптируется к любому количеству фотографий в этом массиве!
+       ===================================================================== */
+    const galleryPhotos = [];
+    for (let i = 9; i <= 38; i++) {
+      galleryPhotos.push(`photo${i}.jpg`);
+    }
+
+    /* =====================================================================
+       ДАННЫЕ: ТЕКСТ ПИСЬМА ОТ СЕНИ
+       Замени эту строку на свой настоящий текст письма, когда будешь готов!
+       ===================================================================== */
+    const letterText = `Здесь будет письмо...
+
+Моя любимая Сонечка!
+Каждый миг рядом с тобой — это самое драгоценное сокровище в моей жизни.
+Ты освещаешь мои дни своей улыбкой, теплом и нежностью.
+Я бесконечно люблю тебя и благодарю судьбу за каждую нашу встречу, каждый смех и каждое мгновение вместе.
+Навсегда твой, Сеня ❤️`;
+
+    let currentGalleryIdx = 0;
+
+    /* =====================================================================
+       ДАННЫЕ: СЕКРЕТНАЯ ИГРА «ПОЙМАЙ МОИ СЛОВА» (БЕЗ ПАРОЛЯ)
+       ===================================================================== */
+    // Количество слов для победы в игре (20)
+    const SECRET_GAME_TARGET_WORDS = 20;
+
+    // Тексты при победе в секретной игре:
+    const SECRET_GAME_VICTORY_TITLE = "Молодец ты выиграла";
+    const SECRET_GAME_VICTORY_PASS_TEXT = 'Пароль для "Письма от Сени": Сонечка лучшая';
+
+    // Список из 20 уникальных причин любви, которые падают на экране
+    const secretWordsPool = [
+      "Умная",
+      "Красивая",
+      "Веселая",
+      "Милая",
+      "Целеустремленная",
+      "Хозяйственная",
+      "Очаровательная",
+      "Интересная",
+      "Заботливая",
+      "Добрая",
+      "Нежная",
+      "Верная",
+      "Разговорчивая",
+      "Единственная и не повторимая",
+      "Твоя улыбка",
+      "Твои глаза",
+      "Твой смех",
+      "Ты мое счастье",
+      "Ты моя будущая жена",
+      "Ты моя судьба"
+    ];
+
+
+    /* =====================================================================
+       1. СЕРДЕЧКИ И ПОЖЕЛАНИЯ НА ДЕНЬ РОЖДЕНИЯ (ОПТИМИЗИРОВАННЫЙ ХОЛСТ)
+       - Не скапливаются в кучи (равномерное распределение по ширине экрана)
+       - Уменьшено количество элементов для плавной работы и отсутствия нагрузки
+       - Вспышки кликов исчезают и не накапливаются в фоне
+       ===================================================================== */
+    const canvas = document.getElementById('hearts-canvas');
+    const ctx = canvas.getContext('2d');
+    let canvasWidth = window.innerWidth;
+    let canvasHeight = window.innerHeight;
+    const hearts = [];
+    const burstParticles = []; // Временные частицы для кликов и побед (не накапливаются!)
+
+    // Оптимальная плотность пикселей: плавно на iPhone, без лишней нагрузки на GPU
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+
+    function resizeCanvas() {
+      canvasWidth = window.innerWidth;
+      canvasHeight = window.innerHeight;
+      canvas.width = Math.floor(canvasWidth * dpr);
+      canvas.height = Math.floor(canvasHeight * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // Ровно 12 спокойных фоновых сердечек (без скучивания!)
+    const TOTAL_BG_HEARTS = 12;
+
+    function createBgHeart(laneIdx, startY) {
+      const actualLane = (laneIdx !== undefined) ? laneIdx : Math.floor(Math.random() * TOTAL_BG_HEARTS);
+      const laneWidth = canvasWidth / TOTAL_BG_HEARTS;
+      const laneCenter = (actualLane + 0.5) * laneWidth;
+      // Мягкое смещение внутри своей дорожки: исключает слипание сердечек в кучи
+      const x = laneCenter + (Math.random() - 0.5) * (laneWidth * 0.65);
+
+      return {
+        laneIdx: actualLane,
+        x,
+        baseX: x,
+        y: startY !== undefined ? startY : (canvasHeight + 20 + Math.random() * 40),
+        size: 9 + Math.random() * 11,
+        speedY: 0.45 + Math.random() * 0.45,
+        drift: (Math.random() - 0.5) * 0.15,
+        opacity: 0.2 + Math.random() * 0.32,
+        wobble: Math.random() * Math.PI * 2,
+        wobbleSpeed: 0.012 + Math.random() * 0.015
+      };
+    }
+
+    // Равномерно заполняем экран начальными сердечками
+    for (let i = 0; i < TOTAL_BG_HEARTS; i++) {
+      const startY = (canvasHeight / TOTAL_BG_HEARTS) * i + Math.random() * 30;
+      hearts.push(createBgHeart(i, startY));
+    }
+
+    function drawHeart(x, y, size, opacity) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(size / 30, size / 30);
+      ctx.fillStyle = `rgba(233, 30, 99, ${opacity})`;
+      ctx.beginPath();
+      ctx.moveTo(0, -10);
+      ctx.bezierCurveTo(-15, -25, -30, -5, 0, 25);
+      ctx.bezierCurveTo(30, -5, 15, -25, 0, -10);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    /* 42 персональных тёплых пожелания для Сони от Сени */
+    const birthdayWishes = [
+      "С 17-летием, любимая Сонечка! 🎂",
+      "Сдать все экзамены и ЕГЭ на 100 баллов! 💯",
+      "Легко поступить в вуз мечты! 🎓",
+      "Пусть 11 класс будет лёгким и ярким ✨",
+      "Сияй ярче всех звёзд во вселенной! 🌟",
+      "Я всегда буду рядом с тобой 💕",
+      "Улыбайся чаще, твоя улыбка лечит душу 🌸",
+      "Исполнения самых заветных желаний 💖",
+      "Быть самой счастливой девочкой на свете 🥰",
+      "Крепкого здоровья и сил на всё 🌿",
+      "Меньше переживаний, больше поводов для радости 🌈",
+      "Наше с тобой счастливое будущее 💍",
+      "Путешествовать по всему миру вдвоём ✈️",
+      "Пусть каждый твой день начинается с радости ☕",
+      "Оставайся такой же искренней и нежной ✨",
+      "Уверенности в себе — ты способна на всё! 💪",
+      "Вдохновения и лёгкости в учёбе 📚",
+      "Пусть сбываются даже самые тайные мечты 🚀",
+      "Ты моё главное счастье и любовь! ❤️",
+      "Радости и тепла в каждом моменте 🌼",
+      "Пусть в твоей душе всегда цветёт весна 🌷",
+      "Только хороших новостей и приятных сюрпризов 🎁",
+      "Ты моя гордость и вдохновение 👑",
+      "Впереди самая лучшая взрослая жизнь! 💫",
+      "Ты самая красивая девушка на планете 🌹",
+      "С твоим 17-летием, моя родная! 🎉",
+      "Бесконечного счастья и любви со мной 🤍",
+      "Пусть каждый экзамен покажется простым 📖",
+      "Море искреннего смеха и уюта 🧸",
+      "Всегда верь в себя так же сильно, как я верю в тебя ✨",
+      "Пусть наша любовь с каждым днём становится только крепче 💑",
+      "Тёплых объятий и романтических вечеров 🕯️",
+      "Всегда находить поводы для искреннего счастья ☀️",
+      "Пусть все двери открываются перед тобой 🚪✨",
+      "Гармонии, лёгкости и душевного спокойствия 🍃",
+      "Ты делаешь мой мир невероятно красивым 🌍💕",
+      "Моя самая любимая выпускница 11 класса 🔔",
+      "Навсегда в моём сердце и рядом со мной ❤️",
+      "Пусть все твои начинания венчаются успехом 🏆",
+      "Никогда не сомневайся в своей уникальности ✨",
+      "Ты достойна самого лучшего в этой жизни 👑",
+      "Люблю тебя больше всего на свете! Сеня 💕"
+    ];
+
+    // Количество одновременно парящих пожеланий: 9 для насыщенного и праздничного фона
+    const TOTAL_ACTIVE_WISHES = 9;
+    const activeWishes = [];
+    let wishSequenceIdx = 0;
+    let shuffledWishes = [...birthdayWishes].sort(() => Math.random() - 0.5);
+
+    function getNextWishText() {
+      if (wishSequenceIdx >= shuffledWishes.length) {
+        wishSequenceIdx = 0;
+        shuffledWishes = [...birthdayWishes].sort(() => Math.random() - 0.5);
+      }
+      return shuffledWishes[wishSequenceIdx++];
+    }
+
+    function createFloatingWish(laneIdx, startY) {
+      const text = getNextWishText();
+      const approxWidth = text.length * 7 + 24;
+      const numLanes = 6;
+      const lane = (laneIdx !== undefined ? laneIdx : Math.floor(Math.random() * numLanes)) % numLanes;
+      const laneWidth = Math.max(55, (canvasWidth - 28) / numLanes);
+
+      // Равномерное позиционирование внутри дорожки, предотвращающее наложение плашек
+      const minX = 14 + lane * laneWidth;
+      const maxX = Math.min(canvasWidth - approxWidth - 14, minX + laneWidth * 0.85);
+      const finalX = maxX > minX ? (minX + Math.random() * (maxX - minX)) : Math.max(14, Math.min(canvasWidth - approxWidth - 14, minX));
+      const y = (startY !== undefined) ? startY : (canvasHeight + 35 + Math.random() * 50);
+
+      return {
+        text,
+        laneIdx: lane,
+        x: finalX,
+        baseX: finalX,
+        y,
+        speedY: 0.36 + Math.random() * 0.24,
+        wobble: Math.random() * Math.PI * 2,
+        wobbleSpeed: 0.009 + Math.random() * 0.012,
+        targetOpacity: 0.84 + Math.random() * 0.12
+      };
+    }
+
+    // Инициализируем 9 активных пожеланий, равномерно распределённых по высоте экрана
+    for (let i = 0; i < TOTAL_ACTIVE_WISHES; i++) {
+      const startY = (canvasHeight / TOTAL_ACTIVE_WISHES) * (i + 0.15 + Math.random() * 0.5);
+      activeWishes.push(createFloatingWish(i, startY));
+    }
+
+    function drawWishPill(w, prevCardRect, nextCardRect) {
+      let opacity = w.targetOpacity;
+      if (w.y > canvasHeight - 75) {
+        opacity = Math.max(0, w.targetOpacity * ((canvasHeight - w.y) / 75));
+      } else if (w.y < 85) {
+        opacity = Math.max(0, w.targetOpacity * (w.y / 85));
+      }
+
+      if (opacity <= 0.03) return;
+
+      const padX = 12;
+      const boxH = 26;
+      const radius = 13;
+
+      ctx.save();
+      ctx.font = '600 12.5px -apple-system, BlinkMacSystemFont, "Segoe UI", "Georgia", sans-serif';
+      const textMetrics = ctx.measureText(w.text);
+      const textW = textMetrics.width;
+      const boxW = textW + padX * 2;
+
+      const drawX = Math.max(8, Math.min(canvasWidth - boxW - 8, w.x));
+      const drawY = w.y - boxH / 2;
+
+      // В галерее: пожелания не пропадают, а мягко отодвигаются на 2-й план за фотографии
+      let isBehindSidePhoto = false;
+      if (prevCardRect) {
+        if (
+          drawX + boxW >= prevCardRect.left - 4 &&
+          drawX <= prevCardRect.right + 4 &&
+          drawY + boxH >= prevCardRect.top - 4 &&
+          drawY <= prevCardRect.bottom + 4
+        ) {
+          isBehindSidePhoto = true;
+        }
+      }
+      if (nextCardRect) {
+        if (
+          drawX + boxW >= nextCardRect.left - 4 &&
+          drawX <= nextCardRect.right + 4 &&
+          drawY + boxH >= nextCardRect.top - 4 &&
+          drawY <= nextCardRect.bottom + 4
+        ) {
+          isBehindSidePhoto = true;
+        }
+      }
+
+      if (isBehindSidePhoto) {
+        // Мягкий второй план за фотографией (плашка парит в глубине и не перебивает снимок)
+        opacity = opacity * 0.22;
+      }
+
+      ctx.beginPath();
+      if (typeof ctx.roundRect === 'function') {
+        ctx.roundRect(drawX, drawY, boxW, boxH, radius);
+      } else {
+        ctx.arc(drawX + radius, drawY + radius, radius, Math.PI, 1.5 * Math.PI);
+        ctx.arc(drawX + boxW - radius, drawY + radius, radius, 1.5 * Math.PI, 0);
+        ctx.arc(drawX + boxW - radius, drawY + boxH - radius, radius, 0, 0.5 * Math.PI);
+        ctx.arc(drawX + radius, drawY + boxH - radius, radius, 0.5 * Math.PI, Math.PI);
+        ctx.closePath();
+      }
+
+      // Чистая и быстрая заливка без тяжёлого размытия
+      ctx.fillStyle = `rgba(255, 255, 255, ${opacity * 0.94})`;
+      ctx.fill();
+
+      ctx.strokeStyle = `rgba(244, 143, 177, ${opacity * 0.78})`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      ctx.fillStyle = `rgba(136, 14, 79, ${opacity * 0.96})`;
+      ctx.textBaseline = 'middle';
+      ctx.fillText(w.text, drawX + padX, drawY + boxH / 2);
+
+      ctx.restore();
+    }
+
+    function animateHearts() {
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+      // Получаем координаты полупрозрачных боковых фото слайдера галереи
+      let prevCardRect = null;
+      let nextCardRect = null;
+      if (currentScreenId === 'tab-gallery') {
+        const cardPrev = document.getElementById('gallery-card-prev');
+        const cardNext = document.getElementById('gallery-card-next');
+        if (cardPrev && !cardPrev.classList.contains('hidden')) {
+          prevCardRect = cardPrev.getBoundingClientRect();
+        }
+        if (cardNext && !cardNext.classList.contains('hidden')) {
+          nextCardRect = cardNext.getBoundingClientRect();
+        }
+      }
+
+      // 1. Анимация 12 фоновых сердечек (без скучивания!)
+      for (let i = 0; i < hearts.length; i++) {
+        const h = hearts[i];
+        h.y -= h.speedY;
+        h.wobble += h.wobbleSpeed;
+        h.x = h.baseX + Math.sin(h.wobble) * 8 + h.drift;
+
+        drawHeart(h.x, h.y, h.size, h.opacity);
+
+        if (h.y < -30) {
+          hearts[i] = createBgHeart(h.laneIdx);
+        }
+      }
+
+      // 2. Анимация парящих пожеланий (7 одновременно, чередующиеся дорожки)
+      for (let j = 0; j < activeWishes.length; j++) {
+        const w = activeWishes[j];
+        w.y -= w.speedY;
+        w.wobble += w.wobbleSpeed;
+        w.x = w.baseX + Math.sin(w.wobble) * 10;
+
+        drawWishPill(w, prevCardRect, nextCardRect);
+
+        if (w.y < -40) {
+          activeWishes[j] = createFloatingWish((w.laneIdx + 2) % 5);
+        }
+      }
+
+      // 3. Временные частицы салюта (быстро растворяются и удаляются из памяти!)
+      for (let k = burstParticles.length - 1; k >= 0; k--) {
+        const p = burstParticles[k];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.opacity -= p.fadeRate;
+
+        if (p.opacity <= 0 || p.y < -30) {
+          burstParticles.splice(k, 1);
+        } else {
+          drawHeart(p.x, p.y, p.size, p.opacity);
+        }
+      }
+
+      requestAnimationFrame(animateHearts);
+    }
+    requestAnimationFrame(animateHearts);
+
+    // Функция кратковременного салюта сердечек (НЕ накапливаются в фоне!)
+    function spawnHeartBurst(x, y, count = 10) {
+      const centerX = x || canvasWidth / 2;
+      const centerY = y || canvasHeight / 2;
+      const limit = Math.min(count, 18);
+
+      for (let i = 0; i < limit; i++) {
+        const angle = (Math.PI * 2 / limit) * i + (Math.random() - 0.5) * 0.4;
+        const speed = 1.2 + Math.random() * 2.2;
+        burstParticles.push({
+          x: centerX,
+          y: centerY,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - 1.0,
+          size: 11 + Math.random() * 12,
+          opacity: 0.85,
+          fadeRate: 0.022 + Math.random() * 0.012
+        });
+      }
+    }
+
+
+    /* =====================================================================
+       2. ПЕРЕКЛЮЧЕНИЕ ЭКРАНОВ С ПЛАВНЫМ ПЕРЕХОДОМ (FADE)
+       ===================================================================== */
+    let currentScreenId = 'screen-loading';
+
+    function switchScreen(nextScreenId) {
+      const nextEl = document.getElementById(nextScreenId);
+      if (!nextEl) return;
+      if (currentScreenId === nextScreenId && nextEl.classList.contains('active')) return;
+
+      // Закрываем просмотрщик фото, если он был открыт
+      closeLightbox();
+
+      // Снимаем класс active со всех экранов, чтобы избежать зависших окон
+      const allScreens = document.querySelectorAll('.screen');
+      allScreens.forEach(s => s.classList.remove('active'));
+
+      // Переключаем фоновые слайд-шоу, если применимо
+      const bgLoading = document.getElementById('bg-loading-slideshow');
+      const bgPassword = document.getElementById('bg-password-slideshow');
+
+      if (nextScreenId === 'screen-loading') {
+        if (bgLoading) bgLoading.style.display = 'block';
+        if (bgPassword) bgPassword.style.display = 'none';
+      } else if (nextScreenId === 'screen-password') {
+        if (bgLoading) bgLoading.style.display = 'none';
+        if (bgPassword) bgPassword.style.display = 'block';
+      } else {
+        if (bgLoading) bgLoading.style.display = 'none';
+        if (bgPassword) bgPassword.style.display = 'none';
+      }
+
+      // Мгновенно делаем целевой экран активным
+      nextEl.classList.add('active');
+      currentScreenId = nextScreenId;
+
+      // Особые действия при входе на экран
+      if (nextScreenId === 'tab-letter') {
+        startTypewriter();
+      }
+      if (nextScreenId === 'tab-gallery') {
+        renderGallery();
+      }
+      if (nextScreenId === 'tab-secret-game') {
+        initSecretGame();
+      }
+    }
+
+    function openTab(tabId) {
+      switchScreen(tabId);
+    }
+
+    function backToMenu() {
+      // Останавливаем видео, если оно играло
+      const vid = document.getElementById('tiktok-video');
+      if (vid && !vid.paused) {
+        vid.pause();
+      }
+      // Останавливаем секретную игру, если выходим в меню
+      stopSecretGame();
+      switchScreen('screen-menu');
+    }
+
+
+    /* =====================================================================
+       3. СМЕНА ФОНОВЫХ ФОТО (СЛАЙД-ШОУ НА ЭКРАНАХ 1 И 2)
+       ===================================================================== */
+    function setupBackgroundSlider(imgIds, intervalMs = 4500) {
+      let idx = 0;
+      setInterval(() => {
+        const prevImg = document.getElementById(imgIds[idx]);
+        if (prevImg) prevImg.classList.remove('active');
+
+        idx = (idx + 1) % imgIds.length;
+        const nextImg = document.getElementById(imgIds[idx]);
+        if (nextImg) nextImg.classList.add('active');
+      }, intervalMs);
+    }
+
+    setupBackgroundSlider(['load-bg-1', 'load-bg-2', 'load-bg-3'], 4500);
+    setupBackgroundSlider(['pass-bg-1', 'pass-bg-2', 'pass-bg-3'], 4500);
+
+
+    /* =====================================================================
+       4. ЭКРАН 1: ЛОГИКА ЗАГРУЗКИ (15 СЕКУНД)
+       ===================================================================== */
+    const totalLoadingTimeMs = 15000; // Ровно 15 секунд
+    const progressBar = document.getElementById('loading-progress-bar');
+    const loadingStatusText = document.getElementById('loading-status-text');
+    const loadingCounterText = document.getElementById('loading-counter-text');
+    const startLoadingTime = Date.now();
+
+    const loadingInterval = setInterval(() => {
+      const elapsed = Date.now() - startLoadingTime;
+      const progressPercent = Math.min(100, (elapsed / totalLoadingTimeMs) * 100);
+
+      progressBar.style.width = `${progressPercent}%`;
+
+      const remainingSec = Math.max(0, Math.ceil((totalLoadingTimeMs - elapsed) / 1000));
+      if (elapsed < totalLoadingTimeMs) {
+        loadingCounterText.textContent = `Осталось: ${remainingSec} сек...`;
+      }
+
+      if (elapsed >= totalLoadingTimeMs) {
+        clearInterval(loadingInterval);
+        progressBar.style.width = '100%';
+        loadingCounterText.textContent = 'Готово!';
+
+        // Точный текст по требованию:
+        // "Ошибка: слишком много любви, ускорено в 29×10^2009" (степень 2009 строго над 10)
+        loadingStatusText.innerHTML = 'Ошибка: слишком много любви,<br>ускорено в <span class="math-exp">29×10<sup>2009</sup></span>';
+        loadingStatusText.style.color = '#c2185b';
+
+        // Через 2 секунды плавный автоматический переход на экран пароля
+        setTimeout(() => {
+          switchScreen('screen-password');
+        }, 2000);
+      }
+    }, 50);
+
+
+    /* =====================================================================
+       5. ЭКРАН 2: ЛОГИКА ПАРОЛЯ
+       Правильный ответ: "404"
+       ===================================================================== */
+    const passwordInput = document.getElementById('password-input');
+    const passwordBtn = document.getElementById('password-submit-btn');
+    const passwordErrorMsg = document.getElementById('password-error-msg');
+
+    function checkPassword() {
+      const val = (passwordInput.value || '').trim();
+
+      if (val === '404') {
+        passwordErrorMsg.textContent = '';
+        spawnHeartBurst();
+        switchScreen('screen-menu');
+      } else {
+        passwordErrorMsg.textContent = 'Попробуй ещё раз, любимая 💕';
+        passwordInput.classList.add('shake');
+        passwordInput.value = '';
+
+        setTimeout(() => {
+          passwordInput.classList.remove('shake');
+          passwordInput.focus();
+        }, 500);
+      }
+    }
+
+    passwordBtn.addEventListener('click', checkPassword);
+    passwordInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        checkPassword();
+      }
+    });
+
+
+    /* =====================================================================
+       6. ВКЛАДКА 1: ЖИВОЙ СЧЁТЧИК ВАЖНЫХ ДАТ
+       Формат: "Что произошло в этот день" — прошло: X лет Y месяцев Z дней A часов B минут C секунд
+       ===================================================================== */
+    // Склонение русских слов для счётчика
+    function plural(n, one, two, five) {
+      const nAbs = Math.abs(n);
+      const mod100 = nAbs % 100;
+      const mod10 = nAbs % 10;
+      if (mod100 >= 11 && mod100 <= 19) return `${n} ${five}`;
+      if (mod10 === 1) return `${n} ${one}`;
+      if (mod10 >= 2 && mod10 <= 4) return `${n} ${two}`;
+      return `${n} ${five}`;
+    }
+
+    // Расчёт точного календарного времени (лет, месяцев, дней, часов, минут, секунд)
+    function calculateTimeElapsed(startDate, now) {
+      let y = now.getFullYear() - startDate.getFullYear();
+      let m = now.getMonth() - startDate.getMonth();
+      let d = now.getDate() - startDate.getDate();
+      let h = now.getHours() - startDate.getHours();
+      let min = now.getMinutes() - startDate.getMinutes();
+      let s = now.getSeconds() - startDate.getSeconds();
+
+      if (s < 0) {
+        s += 60;
+        min--;
+      }
+      if (min < 0) {
+        min += 60;
+        h--;
+      }
+      if (h < 0) {
+        h += 24;
+        d--;
+      }
+      if (d < 0) {
+        // Дней в предыдущем месяце
+        const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+        d += prevMonth.getDate();
+        m--;
+      }
+      if (m < 0) {
+        m += 12;
+        y--;
+      }
+
+      return { y, m, d, h, min, s };
+    }
+
+    function renderDatesList() {
+      const container = document.getElementById('dates-list');
+      container.innerHTML = '';
+
+      importantDates.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = 'date-card-item';
+        card.innerHTML = `
+          <div class="date-event-header">${item.title}</div>
+          <span class="date-label-badge">${item.displayDate}</span>
+          <div class="date-live-counter" id="counter-${index}">
+            Считаем мгновения...
+          </div>
+        `;
+        container.appendChild(card);
+      });
+      updateAllCounters();
+    }
+
+    function updateAllCounters() {
+      const now = new Date();
+
+      importantDates.forEach((item, index) => {
+        const counterEl = document.getElementById(`counter-${index}`);
+        if (!counterEl) return;
+
+        if (now.getTime() >= item.date.getTime()) {
+          const diff = calculateTimeElapsed(item.date, now);
+          counterEl.innerHTML = `прошло: <span class="counter-highlight">${plural(diff.y, 'год', 'года', 'лет')} ${plural(diff.m, 'месяц', 'месяца', 'месяцев')} ${plural(diff.d, 'день', 'дня', 'дней')} ${plural(diff.h, 'час', 'часа', 'часов')} ${plural(diff.min, 'минута', 'минуты', 'минут')} ${plural(diff.s, 'секунда', 'секунды', 'секунд')}</span>`;
+        } else {
+          // Если событие в будущем относительно часов устройства
+          const futureDiff = calculateTimeElapsed(now, item.date);
+          counterEl.innerHTML = `до события: <span class="counter-highlight">${plural(futureDiff.d, 'день', 'дня', 'дней')} ${plural(futureDiff.h, 'час', 'часа', 'часов')} ${plural(futureDiff.min, 'минута', 'минуты', 'минут')} ${plural(futureDiff.s, 'секунда', 'секунды', 'секунд')}</span>`;
+        }
+      });
+    }
+
+    // Инициализируем список дат и запускаем обновление каждую секунду
+    renderDatesList();
+    setInterval(updateAllCounters, 1000);
+
+
+    /* =====================================================================
+       7. ВКЛАДКА 2: ВИДЕО
+       ===================================================================== */
+    function startVideoPlay() {
+      const video = document.getElementById('tiktok-video');
+      const overlay = document.getElementById('video-overlay');
+
+      // Всегда гарантированно выключаем фоновую музыку при включении видео
+      pauseRomanticMusicForVideo();
+
+      if (video) {
+        video.play().then(() => {
+          if (overlay) overlay.style.display = 'none';
+        }).catch((err) => {
+          console.warn('Автозапуск видео заблокирован:', err);
+          if (overlay) overlay.style.display = 'none';
+        });
+      }
+    }
+
+    // Слушатели событий на самом теге видео (включая запуск через нативные кнопки воспроизведения Safari)
+    const tiktokVideoEl = document.getElementById('tiktok-video');
+    if (tiktokVideoEl) {
+      tiktokVideoEl.addEventListener('play', () => {
+        pauseRomanticMusicForVideo();
+      });
+      tiktokVideoEl.addEventListener('playing', () => {
+        pauseRomanticMusicForVideo();
+      });
+    }
+
+    function handleVideoError() {
+      const fallbackBox = document.getElementById('video-fallback');
+      if (fallbackBox) {
+        fallbackBox.style.display = 'block';
+      }
+    }
+
+
+    /* =====================================================================
+       8. ВКЛАДКА 3: ИГРА "Я ТЕБЯ ЛЮБЛЮ БОЛЬШЕ"
+       После 100 кликов появляется сообщение
+       ===================================================================== */
+    let loveClickCount = 0;
+    const loveTextAbove = document.getElementById('love-text-above');
+    const loveMainBtn = document.getElementById('love-main-btn');
+    const loveEqualMsg = document.getElementById('love-equal-message');
+
+    function handleLoveClick() {
+      loveClickCount++;
+
+      // Создаем маленький нежный салют на месте клика (3 частицы)
+      spawnHeartBurst(window.innerWidth / 2, window.innerHeight / 2, 3);
+
+      if (loveClickCount >= 100) {
+        loveTextAbove.style.display = 'none';
+        loveMainBtn.style.display = 'none';
+        loveEqualMsg.style.display = 'block';
+        spawnHeartBurst(window.innerWidth / 2, window.innerHeight / 2, 16);
+      } else {
+        const iLoveCount = 1 + loveClickCount;
+        const youLoveCount = loveClickCount;
+
+        loveTextAbove.textContent = `Я тебя люблю ${plural(iLoveCount, 'раз', 'раза', 'раз')}`;
+        loveMainBtn.textContent = `Ты меня любишь ${plural(youLoveCount, 'раз', 'раза', 'раз')}`;
+      }
+    }
+
+
+    /* =====================================================================
+       9. ВКЛАДКА 4: ГАЛЕРЕЯ (30 ФОТО — СЛАЙДЕР С АМБИЕНТ-СВЕЧЕНИЕМ)
+       Адаптивные размеры, амбиент-подсветка, полноэкранный режим и свайпы
+       ===================================================================== */
+    // Отрисовка адаптивного слайдера с амбиент-свечением
+    function renderGallery() {
+      if (galleryPhotos.length === 0) return;
+
+      const total = galleryPhotos.length;
+      const prevIdx = currentGalleryIdx - 1;
+      const nextIdx = currentGalleryIdx + 1;
+
+      const imgPrev = document.getElementById('gallery-img-prev');
+      const bgPrev = document.getElementById('gallery-bg-prev');
+      const cardPrev = document.getElementById('gallery-card-prev');
+
+      const imgCurr = document.getElementById('gallery-img-curr');
+      const bgCurr = document.getElementById('gallery-bg-curr');
+
+      const imgNext = document.getElementById('gallery-img-next');
+      const bgNext = document.getElementById('gallery-bg-next');
+      const cardNext = document.getElementById('gallery-card-next');
+
+      const counter = document.getElementById('gallery-counter');
+
+      const currSrc = `images/${galleryPhotos[currentGalleryIdx]}`;
+
+      // Текущее фото и его амбиентное свечение
+      if (imgCurr) imgCurr.src = currSrc;
+      if (bgCurr) bgCurr.style.backgroundImage = `url("${currSrc}")`;
+
+      // Предыдущее фото (видно полупрозрачным, если есть)
+      if (prevIdx >= 0) {
+        const prevSrc = `images/${galleryPhotos[prevIdx]}`;
+        if (imgPrev) imgPrev.src = prevSrc;
+        if (bgPrev) bgPrev.style.backgroundImage = `url("${prevSrc}")`;
+        if (cardPrev) cardPrev.classList.remove('hidden');
+      } else {
+        if (cardPrev) cardPrev.classList.add('hidden');
+      }
+
+      // Следующее фото (видно полупрозрачным, если есть)
+      if (nextIdx < total) {
+        const nextSrc = `images/${galleryPhotos[nextIdx]}`;
+        if (imgNext) imgNext.src = nextSrc;
+        if (bgNext) bgNext.style.backgroundImage = `url("${nextSrc}")`;
+        if (cardNext) cardNext.classList.remove('hidden');
+      } else {
+        if (cardNext) cardNext.classList.add('hidden');
+      }
+
+      if (counter) {
+        counter.textContent = `Фото ${currentGalleryIdx + 1} из ${total}`;
+      }
+
+      // Умный предпросмотр: кэшируем следующее фото в памяти
+      if (currentGalleryIdx + 2 < total) {
+        const preload = new Image();
+        preload.src = `images/${galleryPhotos[currentGalleryIdx + 2]}`;
+      }
+    }
+
+    function prevGalleryPhoto() {
+      if (currentGalleryIdx > 0) {
+        currentGalleryIdx--;
+        renderGallery();
+      }
+    }
+
+    function nextGalleryPhoto() {
+      if (currentGalleryIdx < galleryPhotos.length - 1) {
+        currentGalleryIdx++;
+        renderGallery();
+      }
+    }
+
+    function openCurrentInLightbox() {
+      if (galleryPhotos[currentGalleryIdx]) {
+        openLightbox(`images/${galleryPhotos[currentGalleryIdx]}`, galleryPhotos, currentGalleryIdx);
+      }
+    }
+
+    // Обработка жестов свайпа для слайдера на iPhone Safari
+    const galleryTouchStage = document.getElementById('gallery-touch-stage');
+    if (galleryTouchStage) {
+      let touchStartX = 0;
+      let touchEndX = 0;
+
+      galleryTouchStage.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
+
+      galleryTouchStage.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        const diffX = touchEndX - touchStartX;
+        if (Math.abs(diffX) > 40) {
+          if (diffX < 0) {
+            nextGalleryPhoto(); // Свайп влево -> следующее фото
+          } else {
+            prevGalleryPhoto(); // Свайп вправо -> предыдущее фото
+          }
+        }
+      }, { passive: true });
+    }
+
+    // Первичная инициализация галереи
+    renderGallery();
+
+
+    /* =====================================================================
+       10. ВКЛАДКА 5: ПИСЬМО ОТ СЕНИ (ЭФФЕКТ ПЕЧАТНОЙ МАШИНКИ)
+       Скорость печати: 1 символ каждые 30–45 миллисекунд
+       ===================================================================== */
+    let typewriterTimeout = null;
+    let typewriterCharIndex = 0;
+    let isTyping = false;
+
+    function startTypewriter() {
+      clearTimeout(typewriterTimeout);
+      typewriterCharIndex = 0;
+      isTyping = true;
+      const typedTextEl = document.getElementById('letter-typed-text');
+      const cursorEl = document.getElementById('typewriter-cursor');
+      if (typedTextEl) typedTextEl.textContent = '';
+      if (cursorEl) cursorEl.style.display = 'inline-block';
+
+      function typeNextChar() {
+        if (!isTyping) return;
+
+        if (typewriterCharIndex < letterText.length) {
+          if (typedTextEl) typedTextEl.textContent += letterText.charAt(typewriterCharIndex);
+          typewriterCharIndex++;
+
+          // Рандомизируем легкую задержку 30-45 мс для живого эффекта
+          const delay = 30 + Math.floor(Math.random() * 15);
+          typewriterTimeout = setTimeout(typeNextChar, delay);
+        } else {
+          isTyping = false;
+        }
+      }
+
+      typeNextChar();
+    }
+
+    function restartTypewriter() {
+      startTypewriter();
+    }
+
+    function showFullLetter() {
+      clearTimeout(typewriterTimeout);
+      isTyping = false;
+      const typedTextEl = document.getElementById('letter-typed-text');
+      if (typedTextEl) typedTextEl.textContent = letterText;
+    }
+
+
+    /* =====================================================================
+       11. ПОЛНОЭКРАННЫЙ ПРОСМОТР ФОТО (LIGHTBOX С ЛИСТАНИЕМ)
+       Поддерживает стрелки ‹ и ›, свайпы и клавиатуру
+       ===================================================================== */
+    let lightboxActiveList = null;
+    let lightboxActiveIndex = -1;
+
+    function openLightbox(src, list, index) {
+      const modal = document.getElementById('lightbox-modal');
+      const img = document.getElementById('lightbox-img');
+      const counterEl = document.getElementById('lightbox-counter');
+      const prevBtn = document.getElementById('lightbox-prev-btn');
+      const nextBtn = document.getElementById('lightbox-next-btn');
+
+      if (img) img.src = src;
+
+      if (list && index !== undefined) {
+        lightboxActiveList = list;
+        lightboxActiveIndex = index;
+        if (counterEl) counterEl.textContent = `Фото ${index + 1} из ${list.length}`;
+        if (prevBtn) prevBtn.style.display = 'flex';
+        if (nextBtn) nextBtn.style.display = 'flex';
+      } else {
+        // Если открыто боковое одиночное фото (из Вкладок 1, 2, 3, 5)
+        lightboxActiveList = null;
+        lightboxActiveIndex = -1;
+        if (counterEl) counterEl.textContent = 'Воспоминание ❤️';
+        if (prevBtn) prevBtn.style.display = 'none';
+        if (nextBtn) nextBtn.style.display = 'none';
+      }
+
+      if (modal) modal.classList.add('active');
+    }
+
+    function closeLightbox() {
+      const modal = document.getElementById('lightbox-modal');
+      if (modal) modal.classList.remove('active');
+      lightboxActiveList = null;
+      lightboxActiveIndex = -1;
+    }
+
+    function prevLightboxPhoto() {
+      if (!lightboxActiveList || lightboxActiveIndex <= 0) return;
+      lightboxActiveIndex--;
+      updateLightboxContent();
+    }
+
+    function nextLightboxPhoto() {
+      if (!lightboxActiveList || lightboxActiveIndex >= lightboxActiveList.length - 1) return;
+      lightboxActiveIndex++;
+      updateLightboxContent();
+    }
+
+    function updateLightboxContent() {
+      if (!lightboxActiveList) return;
+      const img = document.getElementById('lightbox-img');
+      const counterEl = document.getElementById('lightbox-counter');
+      const photoName = lightboxActiveList[lightboxActiveIndex];
+
+      if (img) {
+        img.style.opacity = '0.3';
+        img.style.transform = 'scale(0.96)';
+        setTimeout(() => {
+          img.src = `images/${photoName}`;
+          img.style.opacity = '1';
+          img.style.transform = 'scale(1)';
+        }, 120);
+      }
+
+      if (counterEl) {
+        counterEl.textContent = `Фото ${lightboxActiveIndex + 1} из ${lightboxActiveList.length}`;
+      }
+
+      // Синхронизируем со слайдером галереи, если смотрим фото галереи
+      if (lightboxActiveList === galleryPhotos) {
+        currentGalleryIdx = lightboxActiveIndex;
+        renderGallery();
+      }
+    }
+
+    // Управление клавишами на клавиатуре: Escape, влево, вправо
+    document.addEventListener('keydown', (e) => {
+      const modal = document.getElementById('lightbox-modal');
+      const isLightboxOpen = modal && modal.classList.contains('active');
+
+      if (e.key === 'Escape') {
+        if (isLightboxOpen) closeLightbox();
+      } else if (e.key === 'ArrowLeft') {
+        if (isLightboxOpen) {
+          prevLightboxPhoto();
+        } else if (currentScreenId === 'tab-gallery') {
+          prevGalleryPhoto();
+        }
+      } else if (e.key === 'ArrowRight') {
+        if (isLightboxOpen) {
+          nextLightboxPhoto();
+        } else if (currentScreenId === 'tab-gallery') {
+          nextGalleryPhoto();
+        }
+      }
+    });
+
+    // Поддержка жестов свайпа в самом Lightbox на сенсорных экранах
+    const lightboxModalEl = document.getElementById('lightbox-modal');
+    if (lightboxModalEl) {
+      let lbTouchStartX = 0;
+      let lbTouchEndX = 0;
+
+      lightboxModalEl.addEventListener('touchstart', (e) => {
+        lbTouchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
+
+      lightboxModalEl.addEventListener('touchend', (e) => {
+        lbTouchEndX = e.changedTouches[0].screenX;
+        const diffX = lbTouchEndX - lbTouchStartX;
+        if (Math.abs(diffX) > 40) {
+          if (diffX < 0) {
+            nextLightboxPhoto(); // Свайп влево -> следующее фото
+          } else {
+            prevLightboxPhoto(); // Свайп вправо -> предыдущее фото
+          }
+        }
+      }, { passive: true });
+    }
+
+
+    /* =====================================================================
+       12. БЕЗОПАСНАЯ ОБРАБОТКА ОТСУТСТВУЮЩИХ ФОТО (ЗАГЛУШКИ)
+       Сайт гарантированно не ломается, даже если файлов ещё нет в папке
+       ===================================================================== */
+    function handleSideImgError(imgEl, filename) {
+      imgEl.style.display = 'none';
+      const parent = imgEl.parentElement;
+      if (parent && !parent.querySelector('.img-placeholder')) {
+        const ph = document.createElement('div');
+        ph.className = 'img-placeholder';
+        ph.innerHTML = `<span>💕</span><div>${filename}</div>`;
+        parent.appendChild(ph);
+      }
+    }
+
+    function handleGalleryImgError(imgEl) {
+      imgEl.style.opacity = '0.4';
+      imgEl.alt = 'Фото загружается...';
+    }
+
+    function handleBgImgError(imgEl) {
+      // Для фона просто скрываем изображение, остаётся мягкий пастельно-розовый градиент
+      imgEl.style.opacity = '0';
+    }
+
+
+    /* =====================================================================
+       13. РОМАНТИЧЕСКАЯ МУЗЫКА ДЛЯ СОНИ (images/music.mp3)
+       Синхронизирована во всех вкладках и на главном меню
+       ===================================================================== */
+    let isMusicPlaying = false;
+    let webAudioCtx = null;
+    let webAudioInterval = null;
+    let wasMusicPlayingBeforeVideo = false;
+
+    function getRomanticAudio() {
+      let audio = document.getElementById('romantic-audio');
+      if (!audio) {
+        audio = document.createElement('audio');
+        audio.id = 'romantic-audio';
+        audio.src = 'images/music.mp3';
+        audio.loop = true;
+        audio.preload = 'auto';
+        audio.playsInline = true;
+        document.body.appendChild(audio);
+      }
+      return audio;
+    }
+
+    function unlockWebAudio() {
+      try {
+        if (!webAudioCtx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) {
+            webAudioCtx = new AudioContext();
+          }
+        }
+        if (webAudioCtx && webAudioCtx.state === 'suspended') {
+          webAudioCtx.resume();
+        }
+      } catch (e) {
+        console.warn('AudioContext init error:', e);
+      }
+    }
+
+    // Синхронизация всех кнопок музыки во всех экранах и вкладках
+    function updateMusicButtonsUI(playing) {
+      // Кнопка в главном меню
+      const mainBtn = document.getElementById('music-toggle-btn');
+      const mainIcon = document.getElementById('music-btn-icon');
+      if (mainBtn) {
+        if (playing) mainBtn.classList.add('playing');
+        else mainBtn.classList.remove('playing');
+      }
+      if (mainIcon) {
+        mainIcon.textContent = playing ? '🎶' : '🎵';
+      }
+
+      // Все кнопки музыки в шапках вкладок
+      const allTabBtns = document.querySelectorAll('.tab-music-btn');
+      allTabBtns.forEach(btn => {
+        if (playing) btn.classList.add('playing');
+        else btn.classList.remove('playing');
+        const icon = btn.querySelector('.tab-music-icon');
+        if (icon) {
+          icon.textContent = playing ? '🎶' : '🎵';
+        }
+      });
+    }
+
+    function toggleRomanticMusic() {
+      unlockWebAudio();
+      const audio = getRomanticAudio();
+
+      if (isMusicPlaying) {
+        // Выключаем музыку
+        if (audio) {
+          try { audio.pause(); } catch (e) {}
+        }
+        stopWebAudioMusic();
+        isMusicPlaying = false;
+        updateMusicButtonsUI(false);
+      } else {
+        // Включаем музыку
+        isMusicPlaying = true;
+        updateMusicButtonsUI(true);
+        spawnHeartBurst(window.innerWidth - 45, 45, 8);
+
+        if (audio) {
+          audio.volume = 0.95;
+          if (!audio.src || audio.src === '' || audio.src.endsWith('/')) {
+            audio.src = 'images/music.mp3';
+          }
+          const playPromise = audio.play();
+          if (playPromise !== undefined) {
+            playPromise.then(() => {
+              // Настоящий трек играет успешно!
+              stopWebAudioMusic();
+            }).catch((err) => {
+              console.warn('HTML5 Audio воспроизведение отклонено, включаем встроенный синтезатор:', err);
+              playMusicBoxFallback();
+            });
+          }
+        } else {
+          playMusicBoxFallback();
+        }
+      }
+    }
+
+    function pauseRomanticMusicForVideo() {
+      wasMusicPlayingBeforeVideo = isMusicPlaying;
+      const audio = getRomanticAudio();
+      if (audio) {
+        try {
+          audio.pause();
+        } catch (e) {}
+      }
+      stopWebAudioMusic();
+      if (webAudioCtx && webAudioCtx.state === 'running') {
+        try {
+          webAudioCtx.suspend();
+        } catch (e) {}
+      }
+      isMusicPlaying = false;
+      updateMusicButtonsUI(false);
+    }
+
+    function handleAudioError() {
+      console.log('Загрузка audio: перепроверяем images/music.mp3');
+      const audio = getRomanticAudio();
+      if (audio && !audio.dataset.retried) {
+        audio.dataset.retried = 'true';
+        setTimeout(() => {
+          audio.src = 'images/music.mp3';
+          audio.load();
+        }, 300);
+      }
+    }
+
+    // Резервная нежная мелодия музыкальной шкатулки (Web Audio API)
+    function playMusicBoxFallback() {
+      try {
+        unlockWebAudio();
+        if (!webAudioCtx) return;
+
+        const melody = [
+          523.25, 659.25, 783.99, 1046.50, 783.99, 659.25,
+          587.33, 698.46, 880.00, 1046.50, 880.00, 698.46,
+          523.25, 659.25, 783.99, 987.77, 783.99, 659.25,
+          440.00, 523.25, 659.25, 880.00, 783.99, 659.25
+        ];
+        let noteIndex = 0;
+
+        function playSingleNote(freq) {
+          if (!isMusicPlaying || !webAudioCtx) return;
+          try {
+            const osc = webAudioCtx.createOscillator();
+            const gain = webAudioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, webAudioCtx.currentTime);
+
+            gain.gain.setValueAtTime(0.14, webAudioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, webAudioCtx.currentTime + 1.2);
+
+            osc.connect(gain);
+            gain.connect(webAudioCtx.destination);
+            osc.start();
+            osc.stop(webAudioCtx.currentTime + 1.2);
+          } catch (e) {}
+        }
+
+        clearInterval(webAudioInterval);
+        webAudioInterval = setInterval(() => {
+          if (!isMusicPlaying) {
+            clearInterval(webAudioInterval);
+            return;
+          }
+          playSingleNote(melody[noteIndex % melody.length]);
+          noteIndex++;
+        }, 440);
+
+        playSingleNote(melody[0]);
+        noteIndex = 1;
+      } catch (err) {
+        console.warn('Web Audio недоступен:', err);
+      }
+    }
+
+    function stopWebAudioMusic() {
+      if (webAudioInterval) {
+        clearInterval(webAudioInterval);
+        webAudioInterval = null;
+      }
+    }
+
+    // Разблокировка аудио при первом касании страницы
+    document.addEventListener('pointerdown', function unlockAudioOnce() {
+      unlockWebAudio();
+      const audio = getRomanticAudio();
+      if (audio && audio.paused && !isMusicPlaying) {
+        audio.load();
+      }
+      document.removeEventListener('pointerdown', unlockAudioOnce);
+    }, { once: true });
+
+
+    /* =====================================================================
+       14. ПАРОЛЬ ДЛЯ «ПИСЬМА ОТ СЕНИ»
+       ===================================================================== */
+    let isLetterUnlocked = false;
+
+    function openLetterTab() {
+      if (isLetterUnlocked) {
+        switchScreen('tab-letter');
+        return;
+      }
+      const input = document.getElementById('letter-password-input');
+      const errorMsg = document.getElementById('letter-password-error-msg');
+      if (input) input.value = '';
+      if (errorMsg) errorMsg.textContent = '';
+      switchScreen('tab-letter-password');
+      setTimeout(() => {
+        if (input) input.focus();
+      }, 250);
+    }
+
+    function checkLetterPassword() {
+      const input = document.getElementById('letter-password-input');
+      const errorMsg = document.getElementById('letter-password-error-msg');
+      if (!input) return;
+
+      const raw = (input.value || '').trim();
+      // Нормализуем ввод: убираем регистр, заменяем ё на е, убираем знаки препинания и лишние пробелы
+      const normalized = raw.toLowerCase().replace(/ё/g, 'е').replace(/[,.!?:;'"«»\-—_]/g, '').replace(/\s+/g, ' ').trim();
+
+      // Пароли: "Сонечка лучшая" (выдается при победе) и "С днем рождения сонечка"
+      if (normalized === 'сонечка лучшая' || normalized === 'с днем рождения сонечка') {
+        isLetterUnlocked = true;
+        if (errorMsg) errorMsg.textContent = '';
+        input.value = '';
+        spawnHeartBurst(window.innerWidth / 2, window.innerHeight / 2, 25);
+        switchScreen('tab-letter');
+      } else {
+        if (errorMsg) errorMsg.textContent = 'Попробуй ещё раз, любимая 💕';
+        input.classList.add('shake');
+        setTimeout(() => {
+          input.classList.remove('shake');
+          input.focus();
+        }, 500);
+      }
+    }
+
+    const letterPassInputEl = document.getElementById('letter-password-input');
+    if (letterPassInputEl) {
+      letterPassInputEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') checkLetterPassword();
+      });
+    }
+
+
+    /* =====================================================================
+       15. СЕКРЕТНАЯ ИГРА «ПОЙМАЙ МОИ СЛОВА» (БЕЗ ПАРОЛЯ)
+       ===================================================================== */
+    // Открытие секретной игры напрямую без пароля
+    function openSecretTab() {
+      switchScreen('tab-secret-game');
+    }
+
+    let caughtWordsCount = 0;
+    let secretGameSpawnInterval = null;
+    let isSecretGameActive = false;
+    let availableReasonsQueue = [];
+    let activeReasonsOnScreen = new Set();
+    let caughtReasonsSet = new Set();
+
+    // Горизонтальные дорожки (в процентах), чтобы слова не пересекались
+    const wordLanes = [5, 25, 46, 68];
+    const laneLastUsed = [0, 0, 0, 0];
+
+    // Перемешивание массива случайным образом (алгоритм Фишера-Йетса)
+    function shuffleArray(arr) {
+      const result = [...arr];
+      for (let i = result.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+      }
+      return result;
+    }
+
+    // Создание эффекта вспышки на ТОЧНОМ месте попадания по слову
+    function createHitBurst(hitX, hitY) {
+      const burstEl = document.createElement('div');
+      burstEl.className = 'catch-burst-effect';
+      burstEl.textContent = '✨ +1';
+      burstEl.style.left = `${Math.round(hitX)}px`;
+      burstEl.style.top = `${Math.round(hitY)}px`;
+      document.body.appendChild(burstEl);
+
+      setTimeout(() => {
+        if (burstEl.parentNode) burstEl.parentNode.removeChild(burstEl);
+      }, 580);
+    }
+
+    function initSecretGame() {
+      // Останавливаем и очищаем предыдущую игру
+      stopSecretGame();
+
+      caughtWordsCount = 0;
+      caughtReasonsSet = new Set();
+      activeReasonsOnScreen = new Set();
+      availableReasonsQueue = shuffleArray(secretWordsPool);
+      isSecretGameActive = true;
+      updateSecretGameCounter();
+
+      const gameArea = document.getElementById('secret-game-area');
+      if (gameArea) gameArea.innerHTML = '';
+
+      const victoryModal = document.getElementById('secret-victory-modal');
+      if (victoryModal) victoryModal.classList.remove('active');
+
+      const targetEl = document.getElementById('secret-counter-target');
+      if (targetEl) targetEl.textContent = SECRET_GAME_TARGET_WORDS;
+
+      // Первые слова сразу
+      spawnFallingWord();
+      setTimeout(spawnFallingWord, 650);
+
+      // Интервал появления новых причин
+      secretGameSpawnInterval = setInterval(() => {
+        if (!isSecretGameActive) return;
+        const currentWords = document.querySelectorAll('.falling-word:not(.popped)');
+        if (currentWords.length < 3 && availableReasonsQueue.length > 0) {
+          spawnFallingWord();
+        }
+      }, 1200);
+    }
+
+    function stopSecretGame() {
+      isSecretGameActive = false;
+      if (secretGameSpawnInterval) {
+        clearInterval(secretGameSpawnInterval);
+        secretGameSpawnInterval = null;
+      }
+      if (activeReasonsOnScreen) activeReasonsOnScreen.clear();
+      availableReasonsQueue = [];
+      const gameArea = document.getElementById('secret-game-area');
+      if (gameArea) gameArea.innerHTML = '';
+    }
+
+    function spawnFallingWord() {
+      if (!isSecretGameActive || caughtWordsCount >= SECRET_GAME_TARGET_WORDS) return;
+
+      const gameArea = document.getElementById('secret-game-area');
+      if (!gameArea) return;
+
+      if (availableReasonsQueue.length === 0) return;
+
+      const phrase = availableReasonsQueue.shift();
+      activeReasonsOnScreen.add(phrase);
+
+      const now = Date.now();
+      let bestLaneIdx = 0;
+      let oldestTime = Infinity;
+
+      for (let i = 0; i < wordLanes.length; i++) {
+        if (laneLastUsed[i] < oldestTime) {
+          oldestTime = laneLastUsed[i];
+          bestLaneIdx = i;
+        }
+      }
+      laneLastUsed[bestLaneIdx] = now;
+
+      const laneX = wordLanes[bestLaneIdx] + (Math.random() * 6 - 3);
+      const duration = (4.2 + Math.random() * 2.0).toFixed(2);
+      const gameHeight = gameArea.clientHeight > 80 ? (gameArea.clientHeight + 70) : (window.innerHeight - 170);
+
+      const wordEl = document.createElement('div');
+      wordEl.className = 'falling-word';
+      wordEl.textContent = phrase;
+      wordEl.style.left = `${Math.max(4, Math.min(62, laneX))}%`;
+      wordEl.style.animationDuration = `${duration}s`;
+      wordEl.style.setProperty('--fall-dist', `${gameHeight}px`);
+
+      // Обработка тапа по слову (нажатие)
+      const handleCatch = (e) => {
+        if (e) {
+          e.stopPropagation();
+          e.preventDefault();
+        }
+        if (wordEl.dataset.caught === 'true') return;
+        wordEl.dataset.caught = 'true';
+
+        // 1. ИЗМЕРЯЕМ ТОЧНЫЕ ФИЗИЧЕСКИЕ КООРДИНАТЫ ДО ЛЮБЫХ ИЗМЕНЕНИЙ СТИЛЕЙ!
+        const rect = wordEl.getBoundingClientRect();
+        let hitX = rect.left + rect.width / 2;
+        let hitY = rect.top + rect.height / 2;
+
+        if (e && e.clientX && e.clientY) {
+          hitX = e.clientX;
+          hitY = e.clientY;
+        } else if (e && e.touches && e.touches.length > 0) {
+          hitX = e.touches[0].clientX;
+          hitY = e.touches[0].clientY;
+        }
+
+        // 2. Замораживаем текущую матрицу трансформации, чтобы элемент не сбрасывался наверх (top: -50px)
+        try {
+          const computedStyle = window.getComputedStyle(wordEl);
+          const currentTransform = computedStyle.transform;
+          wordEl.style.animation = 'none';
+          wordEl.style.transform = (currentTransform && currentTransform !== 'none')
+            ? `${currentTransform} scale(1.18)`
+            : 'scale(1.18)';
+        } catch (err) {}
+
+        // 3. Плавное растворение и лопание на месте
+        wordEl.classList.add('popped');
+
+        // 4. Эффект попадания и взрыв сердечек СТРОГО на месте нажатия!
+        createHitBurst(hitX, hitY);
+        spawnHeartBurst(hitX, hitY, 10);
+
+        // 5. Фиксируем как пойманную причину
+        activeReasonsOnScreen.delete(phrase);
+        caughtReasonsSet.add(phrase);
+
+        // 6. Подпрыгивание конверта внизу
+        const env = document.getElementById('secret-envelope-icon');
+        if (env) {
+          env.classList.remove('bounce');
+          void env.offsetWidth; // перезапуск CSS-анимации
+          env.classList.add('bounce');
+        }
+
+        caughtWordsCount = caughtReasonsSet.size;
+        updateSecretGameCounter();
+
+        setTimeout(() => {
+          if (wordEl.parentNode) wordEl.parentNode.removeChild(wordEl);
+        }, 220);
+
+        if (caughtWordsCount >= SECRET_GAME_TARGET_WORDS) {
+          onSecretGameWin();
+        }
+      };
+
+      wordEl.addEventListener('pointerdown', handleCatch);
+      wordEl.addEventListener('click', handleCatch);
+
+      // Когда слово долетает до низа без тапа
+      wordEl.addEventListener('animationend', () => {
+        if (wordEl.parentNode) {
+          wordEl.parentNode.removeChild(wordEl);
+        }
+        if (!wordEl.dataset.caught && !caughtReasonsSet.has(phrase)) {
+          activeReasonsOnScreen.delete(phrase);
+          availableReasonsQueue.push(phrase);
+        }
+      });
+
+      gameArea.appendChild(wordEl);
+    }
+
+    function updateSecretGameCounter() {
+      const counterEl = document.getElementById('secret-counter-num');
+      if (counterEl) {
+        counterEl.textContent = caughtWordsCount;
+      }
+    }
+
+    function onSecretGameWin() {
+      isSecretGameActive = false;
+      if (secretGameSpawnInterval) {
+        clearInterval(secretGameSpawnInterval);
+        secretGameSpawnInterval = null;
+      }
+
+      // Большой праздничный салют из сердечек!
+      spawnHeartBurst(window.innerWidth / 2, window.innerHeight / 2, 45);
+      setTimeout(() => {
+        spawnHeartBurst(window.innerWidth / 3, window.innerHeight / 3, 25);
+        spawnHeartBurst((window.innerWidth * 2) / 3, window.innerHeight / 2, 25);
+      }, 300);
+
+      // Заполняем модальное окно победы точными текстами
+      const titleEl = document.querySelector('.secret-victory-title');
+      if (titleEl) {
+        titleEl.textContent = SECRET_GAME_VICTORY_TITLE; // "Молодец ты выиграла"
+      }
+      const victoryTextEl = document.getElementById('secret-victory-text');
+      if (victoryTextEl) {
+        victoryTextEl.innerHTML = `Пароль для "Письма от Сени":<br><span class="counter-highlight" style="display: inline-block; margin-top: 8px; padding: 6px 20px; background: rgba(255, 255, 255, 0.95); border: 2px solid var(--primary-rose); border-radius: 999px; font-size: 18px; font-weight: 700; color: var(--primary-rose); user-select: all; box-shadow: 0 4px 12px rgba(216, 27, 96, 0.15);">Сонечка лучшая</span>`;
+      }
+
+      const victoryModal = document.getElementById('secret-victory-modal');
+      if (victoryModal) {
+        victoryModal.classList.add('active');
+      }
+    }
+
+    function restartSecretGame() {
+      initSecretGame();
+    }
+  </script>
+</body>
+</html>
