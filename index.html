@@ -1458,23 +1458,25 @@
     }
 
     .letter-paper {
-      background: rgba(255, 255, 255, 0.9);
-      border-radius: 18px;
-      border: 1px solid rgba(244, 143, 177, 0.4);
-      padding: 20px 18px;
-      box-shadow: inset 0 2px 8px rgba(216, 27, 96, 0.04);
+      background: rgba(255, 255, 255, 0.94);
+      border-radius: 20px;
+      border: 1.5px solid rgba(244, 143, 177, 0.45);
+      padding: 24px 20px 28px 20px;
+      box-shadow: 0 4px 18px rgba(216, 27, 96, 0.06), inset 0 2px 10px rgba(255, 255, 255, 0.85);
       flex: 1;
       display: flex;
       flex-direction: column;
     }
 
     .letter-text-content {
-      font-size: 16px;
-      line-height: 1.7;
+      font-size: clamp(17px, 2.2vw, 19.5px);
+      line-height: 1.88;
+      letter-spacing: 0.025em;
+      word-spacing: 0.05em;
       color: var(--text-main);
       white-space: pre-wrap;
       word-break: break-word;
-      font-family: "Georgia", "Times New Roman", serif;
+      font-family: "Georgia", "Cambria", "Times New Roman", serif;
       font-style: italic;
     }
 
@@ -1496,7 +1498,9 @@
     .letter-controls {
       display: flex;
       gap: 10px;
-      margin-top: 14px;
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px dashed rgba(244, 143, 177, 0.45);
       justify-content: center;
       flex-wrap: wrap;
     }
@@ -2255,8 +2259,8 @@
               <span id="letter-typed-text"></span><span id="typewriter-cursor" class="typewriter-cursor"></span>
             </div>
             <div class="letter-controls">
-              <button class="letter-btn" onclick="restartTypewriter()">Перечитать сначала ↺</button>
-              <button class="letter-btn" onclick="showFullLetter()">Показать весь текст</button>
+              <button type="button" class="letter-btn" onclick="restartTypewriter()">Перечитать сначала ↺</button>
+              <button type="button" class="letter-btn" onclick="showFullLetter()">Показать весь текст</button>
             </div>
           </div>
         </div>
@@ -2340,7 +2344,7 @@
           <h3 class="secret-victory-title" style="margin-bottom: 8px;">Молодец ты выиграла</h3>
           <p id="secret-victory-text" class="secret-victory-desc" style="font-size: 15px; margin-bottom: 16px; color: var(--accent-deep); line-height: 1.45;">
             Пароль для "Письма от Сени":<br>
-            <span class="counter-highlight" style="display: inline-block; margin-top: 6px; padding: 5px 16px; background: rgba(255, 255, 255, 0.95); border: 1.5px solid var(--primary-rose); border-radius: 999px; font-size: 17px; font-weight: 700; color: var(--primary-rose); user-select: all;">Сонечка лучшая</span>
+            <span class="counter-highlight" style="display: inline-block; margin-top: 6px; padding: 5px 16px; background: rgba(255, 255, 255, 0.95); border: 1.5px solid var(--primary-rose); border-radius: 999px; font-size: 17px; font-weight: 700; color: var(--primary-rose); user-select: all;">С днем рождения</span>
           </p>
           <div class="secret-victory-btns">
             <button class="password-btn" onclick="openLetterTab()" style="width: 100%; margin-bottom: 8px;">Перейти к «Письму от Сени» 💌</button>
@@ -2508,16 +2512,49 @@
     }
 
     /* =====================================================================
-       ДАННЫЕ: ТЕКСТ ПИСЬМА ОТ СЕНИ
-       Замени эту строку на свой настоящий текст письма, когда будешь готов!
+       ПОСТЕПЕННАЯ ПРЕДЗАГРУЗКА ВСЕХ ФОТОГРАФИЙ ПРИ ЗАХОДЕ НА САЙТ
+       (Все 38 фотографий плавно подгружаются в память в фоне)
        ===================================================================== */
-    const letterText = `Здесь будет письмо...
+    const allImagesToPreload = [];
+    for (let i = 1; i <= 38; i++) {
+      allImagesToPreload.push(`images/photo${i}.jpg`);
+    }
 
-Моя любимая Сонечка!
-Каждый миг рядом с тобой — это самое драгоценное сокровище в моей жизни.
-Ты освещаешь мои дни своей улыбкой, теплом и нежностью.
-Я бесконечно люблю тебя и благодарю судьбу за каждую нашу встречу, каждый смех и каждое мгновение вместе.
-Навсегда твой, Сеня ❤️`;
+    function startProgressiveImagePreload() {
+      let preloadIndex = 0;
+      const preloadInterval = setInterval(() => {
+        if (preloadIndex >= allImagesToPreload.length) {
+          clearInterval(preloadInterval);
+          return;
+        }
+        const img = new Image();
+        img.src = allImagesToPreload[preloadIndex];
+        preloadIndex++;
+      }, 120);
+    }
+
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      startProgressiveImagePreload();
+    } else {
+      window.addEventListener('DOMContentLoaded', startProgressiveImagePreload);
+    }
+
+    /* =====================================================================
+       ДАННЫЕ: ТЕКСТ ПИСЬМА ОТ СЕНИ
+       ===================================================================== */
+    const letterText = `Моя любимая Сонечка, поздравляю тебя с днём рождения!
+
+Ты уже почти взрослая — тебе 17 лет, и совсем скоро начнётся новый этап. Я знаю, что сейчас у тебя непростой период: ЕГЭ, выбор вуза, переживания о будущем. Но я хочу, чтобы ты всегда помнила — ты всё сможешь. Я всегда буду рядом, чтобы помогать и поддерживать тебя, и мы обязательно пройдём этот путь вместе. Я буду твоей самой надёжной опорой, человеком, который всегда выслушает.
+
+Ты самая прекрасная девушка на свете. Умнее тебя никого нет, ты невероятно добрая и весёлая. Каждый разговор с тобой — это что-то особенное. У тебя всегда есть темы для обсуждения, ты разбираешься в самых разных сферах, и с таким развитием тебя точно ждёт большое будущее. Меня до сих пор поражает, как много ты знаешь и как легко можешь поддержать беседу на любую тему.
+
+С твоим появлением в моей жизни мой мир стал намного ярче. Каждый миг с тобой — это самое драгоценное сокровище. Ты радуешь меня своей улыбкой каждый день, а твой смех я готов слушать бесконечно. Я бесконечно люблю и ценю тебя и благодарю судьбу за каждую нашу встречу, каждый наш разговор и каждое мгновение, проведённое вместе. Впереди нас ждёт ещё куча дней рождения и множество ярких моментов.
+
+На моих глазах с каждым днём ты становишься всё более красивой, умной и уверенной в себе. Ты очень старательная и всегда добиваешься своих целей, даже когда бывает трудно. С тобой я чувствую себя по-настоящему счастливым. Рядом с тобой я чувствую себя как дома, и никакие расстояния не имеют значения, когда я знаю, что ты есть.
+
+Желаю тебе прекрасного и счастливого будущего, чтобы в нём всегда были близкие тебе люди. Пусть исполняются все твои мечты, будет крепкое здоровье и всё самое лучшее, ведь ты этого достойна. Люблю тебя и безумно ценю — ты мой самый важный и нужный подарок в жизни. В тебе есть всё самое прекрасное, что только можно вообразить, и даже то, что ещё никто не представлял.
+
+Я очень счастлив, что именно ты рядом со мной, и я хочу встречать с тобой каждое утро. Ещё раз поздравляю тебя с днём рождения, моя родная и любимая Сонечка! ❤️`;
 
     let currentGalleryIdx = 0;
 
@@ -2529,7 +2566,7 @@
 
     // Тексты при победе в секретной игре:
     const SECRET_GAME_VICTORY_TITLE = "Молодец ты выиграла";
-    const SECRET_GAME_VICTORY_PASS_TEXT = 'Пароль для "Письма от Сени": Сонечка лучшая';
+    const SECRET_GAME_VICTORY_PASS_TEXT = 'Пароль для "Письма от Сени": С днем рождения';
 
     // Список из 20 уникальных причин любви, которые падают на экране
     const secretWordsPool = [
@@ -3307,7 +3344,7 @@
 
     /* =====================================================================
        10. ВКЛАДКА 5: ПИСЬМО ОТ СЕНИ (ЭФФЕКТ ПЕЧАТНОЙ МАШИНКИ)
-       Скорость печати: 1 символ каждые 30–45 миллисекунд
+       Скорость печати: 150 слов в минуту
        ===================================================================== */
     let typewriterTimeout = null;
     let typewriterCharIndex = 0;
@@ -3326,11 +3363,26 @@
         if (!isTyping) return;
 
         if (typewriterCharIndex < letterText.length) {
-          if (typedTextEl) typedTextEl.textContent += letterText.charAt(typewriterCharIndex);
+          const char = letterText.charAt(typewriterCharIndex);
+          if (typedTextEl) {
+            typedTextEl.textContent += char;
+            const container = document.querySelector('.letter-container');
+            if (container) {
+              container.scrollTop = container.scrollHeight;
+            }
+          }
           typewriterCharIndex++;
 
-          // Рандомизируем легкую задержку 30-45 мс для живого эффекта
-          const delay = 30 + Math.floor(Math.random() * 15);
+          // Скорость строго 150 слов в минуту (~55–65 мс на букву)
+          let delay = 56 + Math.floor(Math.random() * 12);
+          if (char === '.' || char === '!' || char === '?') {
+            delay = 130 + Math.floor(Math.random() * 30);
+          } else if (char === ',' || char === '—' || char === ':') {
+            delay = 90 + Math.floor(Math.random() * 20);
+          } else if (char === '\n') {
+            delay = 110 + Math.floor(Math.random() * 25);
+          }
+
           typewriterTimeout = setTimeout(typeNextChar, delay);
         } else {
           isTyping = false;
@@ -3341,6 +3393,8 @@
     }
 
     function restartTypewriter() {
+      const container = document.querySelector('.letter-container');
+      if (container) container.scrollTop = 0;
       startTypewriter();
     }
 
@@ -3349,6 +3403,8 @@
       isTyping = false;
       const typedTextEl = document.getElementById('letter-typed-text');
       if (typedTextEl) typedTextEl.textContent = letterText;
+      const container = document.querySelector('.letter-container');
+      if (container) container.scrollTop = 0;
     }
 
 
@@ -3733,8 +3789,12 @@
       // Нормализуем ввод: убираем регистр, заменяем ё на е, убираем знаки препинания и лишние пробелы
       const normalized = raw.toLowerCase().replace(/ё/g, 'е').replace(/[,.!?:;'"«»\-—_]/g, '').replace(/\s+/g, ' ').trim();
 
-      // Пароли: "Сонечка лучшая" (выдается при победе) и "С днем рождения сонечка"
-      if (normalized === 'сонечка лучшая' || normalized === 'с днем рождения сонечка') {
+      // Пароли: "С днем рождения" (основной пароль), также принимаются варианты с "сонечка"
+      if (
+        normalized === 'с днем рождения' ||
+        normalized === 'с днем рождения сонечка' ||
+        normalized === 'сонечка лучшая'
+      ) {
         isLetterUnlocked = true;
         if (errorMsg) errorMsg.textContent = '';
         input.value = '';
@@ -3989,7 +4049,7 @@
       }
       const victoryTextEl = document.getElementById('secret-victory-text');
       if (victoryTextEl) {
-        victoryTextEl.innerHTML = `Пароль для "Письма от Сени":<br><span class="counter-highlight" style="display: inline-block; margin-top: 8px; padding: 6px 20px; background: rgba(255, 255, 255, 0.95); border: 2px solid var(--primary-rose); border-radius: 999px; font-size: 18px; font-weight: 700; color: var(--primary-rose); user-select: all; box-shadow: 0 4px 12px rgba(216, 27, 96, 0.15);">Сонечка лучшая</span>`;
+        victoryTextEl.innerHTML = `Пароль для "Письма от Сени":<br><span class="counter-highlight" style="display: inline-block; margin-top: 8px; padding: 6px 20px; background: rgba(255, 255, 255, 0.95); border: 2px solid var(--primary-rose); border-radius: 999px; font-size: 18px; font-weight: 700; color: var(--primary-rose); user-select: all; box-shadow: 0 4px 12px rgba(216, 27, 96, 0.15);">С днем рождения</span>`;
       }
 
       const victoryModal = document.getElementById('secret-victory-modal');
